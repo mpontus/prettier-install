@@ -7,11 +7,17 @@ const which = promisify(require('which'));
 const { spawn } = require('child_process');
 
 function exec(command) {
+  let executable, args;
+
+  if (Array.isArray(command)) {
+    [executable, ...args] = command;
+  } else {
+    executable = '/bin/sh';
+    args = ['-c', command];
+  }
+
   return new Promise((resolve, reject) => {
-    const child = spawn(command, {
-      shell: true,
-      stdio: 'inherit',
-    });
+    const child = spawn(executable, args, { stdio: 'inherit' });
 
     child.on('exit', (code, signal) => {
       if (code === 0) {
@@ -140,8 +146,12 @@ class PrettierInstall {
       'node_modules/.bin/prettier'
     );
 
+    const globPatterns = process.argv.length > 2
+      ? process.argv.slice(2)
+      : ['**/*.js'];
+
     await exec(
-      `${prettierCmd} --write **/*.js`
+      [prettierCmd, '--write', ...globPatterns],
     )
   }
 
