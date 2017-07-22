@@ -1,6 +1,6 @@
 {
   "name": "prettier-install",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "Introduce prettier to your project with this simple CLI utility",
   "main": "index.js",
   "repository": "https://github.com/mpontus/prettier-install",
