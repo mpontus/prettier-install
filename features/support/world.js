@@ -16,7 +16,10 @@ defineSupportCode(({ setWorldConstructor, Before, After }) => {
   Before(function () {
     const { client } = this;
 
-    client.installPrettier.onCall().resolves(true);
+    client.detectYarn.resolves(false);
     spy(client.installsPrettier);
+
+    client.detectGit.resolves(false);
+    spy(client.commitChanges);
   });
 })

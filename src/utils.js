@@ -1,3 +1,7 @@
+const { promisify } = require('util');
+const fs = require('fs');
+const stat = promisify(fs.stat);
+
 function cmd(command) {
   let executable, args;
 
@@ -24,6 +28,16 @@ function cmd(command) {
     });
   });
 };
+
+async function directoryExists(path) {
+  try {
+    const stats = await stat(path);
+
+    return stats.isDirectory();
+  } catch (error) {
+    return false;
+  }
+}
 
 module.exports = {
   cmd,
