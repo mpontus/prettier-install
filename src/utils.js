@@ -1,6 +1,7 @@
 'use strict';
 const { promisify } = require('util');
 const fs = require('fs');
+const detectIndent = require('detect-indent');
 const stat = promisify(fs.stat);
 
 function cmd(command) {
@@ -40,6 +41,41 @@ async function directoryExists(path) {
   }
 }
 
+function modifyJson(filename, cb) {
+  return new Promise((resolve, reject) => {
+    const originalText = fs.readFile(filename, (err, data) => {
+      if (err) {
+        reject(err);
+
+        return;
+      }
+
+      try {
+        const originalJson = JSON.parse(data);
+        const resultJson = cb(originalJson);
+        const indent = detectIndent(data).indent || '  ';
+        const resultText = JSON.stringify(resultJson, null, indent);
+
+        fs.writeFile(filename, resultText, (err) => {
+          if (err) {
+            reject(err);
+
+            return;
+          }
+
+          resolve();
+        });
+      } catch (error) {
+        reject(error);
+
+        return;
+      }
+    });
+  })
+
+}
+
 module.exports = {
   cmd,
+  modifyJson,
 };

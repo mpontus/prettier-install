@@ -7,11 +7,13 @@
   "author": "Mikhail Pontus",
   "license": "MIT",
   "dependencies": {
+    "detect-indent": "^5.0.0",
     "which": "^1.2.14"
   },
   "devDependencies": {
     "chai": "^4.1.0",
     "cucumber": "^2.3.1",
+    "jest": "^20.0.4",
     "ncp": "^2.0.0",
     "shortid": "^2.2.8",
     "sinon": "^2.3.8",
