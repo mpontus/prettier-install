@@ -1,3 +1,5 @@
+'use strict';
+
 class Installer {
   constructor(client) {
     this.client = client;

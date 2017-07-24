@@ -1,3 +1,4 @@
+'use strict';
 const which = require('which');
 const { cmd, isDirectory } = require('./utils');
 

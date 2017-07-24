@@ -1,3 +1,4 @@
+'use strict';
 const { defineSupportCode } = require('cucumber');
 const { expect } = require('chai');
 
