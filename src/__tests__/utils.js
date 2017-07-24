@@ -101,9 +101,12 @@ describe('modifyJson', () => {
       expect(filename).toEqual('test.json');
 
       cb(null, input);
-    })
+    });
+    fs.writeFile.mockImplementationOnce((filename, content, cb) => {
+      cb();
+    });
 
-    modifyJson('test.json', (content) => {
+    await modifyJson('test.json', (content) => {
       expect(content).toEqual({
         foo: 'bar',
       });
@@ -116,10 +119,11 @@ describe('modifyJson', () => {
       output,
       expect.any(Function)
     );
+    
     expect.assertions(3);
   });
 
-  it('preserves the indentation in the original file', () => {
+  it('preserves the indentation in the original file', async () => {
     const [input, output] = [
       [
         '{',
@@ -138,8 +142,11 @@ describe('modifyJson', () => {
 
       cb(null, input);
     });
+    fs.writeFile.mockImplementationOnce((filename, content, cb) => {
+      cb();
+    });
 
-    modifyJson('test.json', (content) => {
+    await modifyJson('test.json', (content) => {
       expect(content).toEqual({ foo: 'bar' });
 
       return { bar: 'baz' }
