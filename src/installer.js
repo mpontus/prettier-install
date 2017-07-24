@@ -9,14 +9,20 @@ class Installer {
     const useYarn = await this.client.detectYarn();
     const useGit = await this.client.detectGit();
 
-    this.client.installPrettier(
+    await this.client.installPrettier(
       useYarn
         ? 'yarn add --dev prettier'
         : 'npm install -D prettier'
     );
 
+    await this.client.runPrettier(
+      useYarn
+        ? 'yarn prettier'
+        : 'npm run prettier'
+    )
+
     if (useGit) {
-      this.client.commitChanges();
+      await this.client.commitChanges();
     }
   }
 }
