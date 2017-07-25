@@ -22,4 +22,8 @@ defineSupportCode(({ Given, When, Then }) => {
   Then('changes must be committed', function () {
     expect(this.client.commitChanges).to.have.been.called;
   });
+
+  Then(/^prettier must run using "([^"]+)"$/, function (cmd) {
+    expect(this.client.runPrettier).to.have.been.calledWith(cmd);
+  })
 });
