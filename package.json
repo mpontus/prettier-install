@@ -22,6 +22,6 @@
     "sinon-chai": "^2.12.0"
   },
   "scripts": {
-    "test": "cucumber-js"
+    "test": "jest && cucumber-js"
   }
 }
