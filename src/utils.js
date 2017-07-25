@@ -1,6 +1,7 @@
 'use strict';
 const { promisify } = require('util');
 const fs = require('fs');
+const { spawn } = require('child_process');
 const detectIndent = require('detect-indent');
 const stat = promisify(fs.stat);
 const readFile = promisify(fs.readFile);

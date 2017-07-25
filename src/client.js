@@ -2,8 +2,7 @@
 const which = require('which');
 const { set } = require('lodash/fp');
 const { cmd, isDirectory } = require('./utils');
-
-const addPrettierCommand = set('scripts.prettier', 'prettier --write **/*.js');
+const { modifyJson } = require('./utils');
 
 class Client {
   async detectYarn() {
@@ -27,24 +26,21 @@ class Client {
   }
 
   installPrettier(command) {
-    cmd(command);
+    return cmd(command);
   }
 
   addPrettierCommand() {
-    modifyJson('./package.json', addPrettierCommand);
+    return modifyJson('package.json',
+      set('scripts.prettier', 'prettier --write **/*.js'));
   }
 
   runPrettier(command) {
-    cmd(command);
+    return cmd(command);
   }
 
   commitChanges() {
-    cmd('git commit --all --edit --message "Installed prettier"')
+    return cmd('git commit --all --edit --message "Installed prettier"')
   }
 }
 
 module.exports = Client;
-
-Object.assign(module.exports, {
-  addPrettierCommand,
-});
