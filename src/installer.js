@@ -15,6 +15,8 @@ class Installer {
         : 'npm install -D prettier'
     );
 
+    await this.client.addPrettierCommand();
+
     await this.client.runPrettier(
       useYarn
         ? 'yarn prettier'
