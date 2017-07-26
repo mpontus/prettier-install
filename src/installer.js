@@ -1,12 +1,20 @@
 'use strict';
 
 class Installer {
-  constructor(client) {
+  constructor(client, feedback) {
     this.client = client;
+    this.feedback = feedback;
   }
 
   async run() {
     const useYarn = await this.client.detectYarn();
+
+    if (useYarn) {
+      this.feedback.say('Yarn detected');
+    } else {
+      this.feedback.say('NPM detected');
+    }
+
     const useGit = await this.client.detectGit();
 
     await this.client.installPrettier(

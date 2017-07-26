@@ -8,10 +8,21 @@ const Installer = require('../../src/installer');
 
 chai.use(sinonChai);
 
+class FeedbackMock {
+  constructor() {
+    this.messages = '';
+  }
+
+  say(message) {
+    this.messages += `${message}\n`;
+  }
+}
+
 defineSupportCode(({ setWorldConstructor, Before, After }) => {
   setWorldConstructor(function () {
     this.client = createStubInstance(Client);
-    this.installer = new Installer(this.client);
+    this.feedback = new FeedbackMock();
+    this.installer = new Installer(this.client, this.feedback);
   });
 
   Before(function () {

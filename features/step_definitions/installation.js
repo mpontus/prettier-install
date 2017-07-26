@@ -29,5 +29,9 @@ defineSupportCode(({ Given, When, Then }) => {
 
   Then('prettier script must be added to package.json', function () {
     expect(this.client.addPrettierCommand).to.have.been.called;
+  });
+
+  Then(/^I must be told "([^"]+)"$/, function (message) {
+    expect(this.feedback.messages).to.have.string(message);
   })
 });
