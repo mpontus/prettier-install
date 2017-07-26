@@ -1,5 +1,6 @@
 'use strict';
-const which = require('which');
+const { promisify } = require('util');
+const which = promisify(require('which'));
 const { set } = require('lodash/fp');
 const { cmd, isDirectory } = require('./utils');
 const { modifyJson } = require('./utils');
@@ -17,7 +18,7 @@ class Client {
 
   async detectGit() {
     try {
-      which('git')
+      await which('git');
     } catch (error) {
       return false;
     }
