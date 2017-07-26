@@ -2,7 +2,7 @@
 const { promisify } = require('util');
 const which = promisify(require('which'));
 const { set } = require('lodash/fp');
-const { cmd, isDirectory } = require('./utils');
+const { cmd, directoryExists } = require('./utils');
 const { modifyJson } = require('./utils');
 
 class Client {
@@ -23,7 +23,7 @@ class Client {
       return false;
     }
 
-    return isDirectory('.git');
+    return directoryExists('.git');
   }
 
   installPrettier(command) {

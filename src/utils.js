@@ -58,4 +58,5 @@ async function modifyJson(filename, cb) {
 module.exports = {
   cmd,
   modifyJson,
+  directoryExists,
 };
