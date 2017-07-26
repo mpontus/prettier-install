@@ -5,7 +5,7 @@ const fs = jest.genMockFromModule('fs');
 let __mockFiles = {};
 
 function __setMockFile(filename, data) {
-  __mockFiles[filename] = data;
+  __mockFiles[filename] = Buffer.from(data);
 };
 
 const readFile = jest.fn(function (filename, callback) {

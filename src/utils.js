@@ -45,7 +45,8 @@ async function directoryExists(path) {
 }
 
 async function modifyJson(filename, cb) {
-  const content = await readFile(filename);
+  const data = await readFile(filename);
+  const content = data.toString();
   const original = JSON.parse(content);
   const result = cb(original);
   const { indent } = detectIndent(content);
