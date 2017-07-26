@@ -17,13 +17,23 @@ class Installer {
 
     const useGit = await this.client.detectGit();
 
+    if (useGit) {
+      this.feedback.say('Git detected');
+    }
+
+    this.feedback.say('Installing prettier');
+
     await this.client.installPrettier(
       useYarn
         ? 'yarn add --dev prettier'
         : 'npm install -D prettier'
     );
 
+    this.feedback.say('Adding prettier command');
+
     await this.client.addPrettierCommand();
+
+    this.feedback.say('Running prettier');
 
     await this.client.runPrettier(
       useYarn
@@ -32,6 +42,8 @@ class Installer {
     )
 
     if (useGit) {
+      this.feedback.say('Committing changes');
+
       await this.client.commitChanges();
     }
   }
