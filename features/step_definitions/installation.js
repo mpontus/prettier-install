@@ -1,6 +1,7 @@
 'use strict';
 const { defineSupportCode } = require('cucumber');
 const { expect } = require('chai');
+const Options = require('../../src/options');
 
 defineSupportCode(({ Given, When, Then }) => {
   Given('yarn is present on the system', function () {
@@ -11,9 +12,25 @@ defineSupportCode(({ Given, When, Then }) => {
     this.client.detectGit.resolves(true);
   });
 
-  When('I run prettier-install', function () {
-    return this.installer.run();
-  });
+  When('I run prettier-install',
+    function () {
+      const options = new Options(['node', 'prettier-install']);
+
+      return this.installer.run(options);
+    }
+  );
+
+  When('I run prettier-install with arguments {stringInDoubleQuotes}',
+    function (args) {
+      const options = new Options([
+        'node',
+        'prettier-install',
+        ...args.split(/\s+/)
+      ]);
+
+      return this.installer.run(options);
+    }
+  );
 
   Then(/^prettier must be installed using "([^"]+)"$/, function (cmd) {
     expect(this.client.installPrettier).to.have.been.calledWith(cmd);
@@ -27,9 +44,11 @@ defineSupportCode(({ Given, When, Then }) => {
     expect(this.client.runPrettier).to.have.been.calledWith(cmd);
   });
 
-  Then('prettier script must be added to package.json', function () {
-    expect(this.client.addPrettierCommand).to.have.been.called;
-  });
+  Then(/^prettier script must be added for patterns "([^"]+)"$/,
+    function (glob) {
+      expect(this.client.addPrettierCommand).to.have.been.calledWith(glob);
+    }
+  );
 
   Then(/^I must be told "([^"]+)"$/, function (message) {
     expect(this.feedback.messages).to.have.string(message);

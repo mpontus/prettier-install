@@ -5,7 +5,7 @@ Feature: Installs prettier
     Then I must be told "Installing prettier"
     Then prettier must be installed using "npm install -D prettier"
     Then I must be told "Adding prettier command"
-    And prettier script must be added to package.json
+    And prettier script must be added for patterns "**/*.js"
     Then I must be told "Running prettier"
     And prettier must run using "npm run prettier"
 
@@ -16,7 +16,7 @@ Feature: Installs prettier
     Then I must be told "Installing prettier"
     Then prettier must be installed using "yarn add --dev prettier"
     Then I must be told "Adding prettier command"
-    And prettier script must be added to package.json
+    And prettier script must be added for patterns "**/*.js"
     Then I must be told "Running prettier"
     And prettier must run using "yarn prettier"
 
@@ -28,7 +28,11 @@ Feature: Installs prettier
     Then I must be told "Installing prettier"
     Then prettier must be installed using "npm install -D prettier"
     Then I must be told "Adding prettier command"
-    And prettier script must be added to package.json
+    And prettier script must be added for patterns "**/*.js"
     Then I must be told "Running prettier"
     And prettier must run using "npm run prettier"
     And changes must be committed
+
+  Scenario: With custom glob patterns
+    When I run prettier-install with arguments "**/*.js **/*.jsx"
+    Then prettier script must be added for patterns "**/*.js **/*.jsx"
