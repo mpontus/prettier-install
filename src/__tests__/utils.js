@@ -1,5 +1,6 @@
 'use strict';
 const fs = require('fs');
+const dedent = require('dedent');
 const { modifyJson } = require('../utils');
 
 const identity = value => value;
@@ -90,11 +91,6 @@ describe('modifyJson', () => {
   })
 
   it('passes empty object to callback when file does not exist', async () => {
-    const output = [
-      '{',
-      '  "foo": "bar"',
-      '}',
-    ].join('\n');
     const fileNotFoundError = Object.assign(
       new Error('no such file or directory'),
       {
@@ -117,24 +113,22 @@ describe('modifyJson', () => {
 
     expect(fs.writeFile).toHaveBeenCalledWith(
       'test.json',
-      output,
+      dedent`{
+        "foo": "bar"
+      }`,
       expect.any(Function)
     );
   });
 
   it('passes json from the existing file to callback', async () => {
     const [input, output] = [
-      [
-        '{',
-        '  "foo": "bar"',
-        '}',
-      ],
-      [
-        '{',
-        '  "bar": "baz"',
-        '}',
-      ]
-    ].map(lines => lines.join('\n'));
+      dedent`{
+        "foo": "bar"
+      }`,
+      dedent`{
+        "bar": "baz"
+      }`,
+    ];
 
     fs.readFile.mockImplementationOnce((filename, cb) => {
       expect(filename).toEqual('test.json');
@@ -164,17 +158,13 @@ describe('modifyJson', () => {
 
   it('preserves the indentation in the original file', async () => {
     const [input, output] = [
-      [
-        '{',
-        '    "foo": "bar"',
-        '}',
-      ],
-      [
-        '{',
-        '    "bar": "baz"',
-        '}',
-      ]
-    ].map(lines => lines.join('\n'));
+      dedent`{
+          "foo": "bar"
+      }`,
+      dedent`{
+          "bar": "baz"
+      }`,
+    ];
 
     fs.readFile.mockImplementationOnce((filename, cb) => {
       expect(filename).toBe('test.json');
