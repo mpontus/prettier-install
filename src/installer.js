@@ -35,7 +35,7 @@ class Installer {
         : 'npm install -D prettier'
     );
 
-    this.feedback.say('Adding prettier command');
+    this.feedback.say('Adding prettier script');
 
     await this.client.addPrettierCommand(globPatterns.join(' '));
 

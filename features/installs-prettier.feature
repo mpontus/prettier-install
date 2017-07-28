@@ -1,38 +1,47 @@
 Feature: Installs prettier
   Scenario: Installing prettier
     When I run prettier-install
-    Then I must be told "NPM detected"
-    Then I must be told "Installing prettier"
-    Then prettier must be installed using "npm install -D prettier"
-    Then I must be told "Adding prettier command"
-    And prettier script must be added for patterns "**/*.js"
-    Then I must be told "Running prettier"
-    And prettier must run using "npm run prettier"
+    Given yarn is not found
+    And project is not under git control
+    Then installer must print "NPM detected"
+    Then installer must print "Installing prettier"
+    And prettier must be installed with "npm install -D prettier"
+    When prettier has been installed successfully
+    Then installer must print "Adding prettier script"
+    And prettier script must be added for "**/*.js"
+    When prettier script is added successfully
+    Then installer must print "Running prettier"
+    And prettier script must be executed
 
-  Scenario: With yarn available
-    Given yarn is present on the system
+  @yarn
+  Scenario: Installing prettier with Yarn
     When I run prettier-install
-    Then I must be told "Yarn detected"
-    Then I must be told "Installing prettier"
-    Then prettier must be installed using "yarn add --dev prettier"
-    Then I must be told "Adding prettier command"
-    And prettier script must be added for patterns "**/*.js"
-    Then I must be told "Running prettier"
-    And prettier must run using "yarn prettier"
+    Given yarn is found
+    And project is not under git control
+    Then installer must print "Yarn detected"
+    Then installer must print "Installing prettier"
+    And prettier must be installed with "yarn add --dev prettier"
+    When prettier has been installed successfully
+    Then installer must print "Adding prettier script"
+    And prettier script must be added for "**/*.js"
+    When prettier script is added successfully
+    Then installer must print "Running prettier"
+    And prettier script must be executed
 
-  Scenario: With git available
-    Given the project is git controlled
+  @git
+  Scenario: Saving changes to Git
     When I run prettier-install
-    Then I must be told "NPM detected"
-    And I must be told "Git detected"
-    Then I must be told "Installing prettier"
-    Then prettier must be installed using "npm install -D prettier"
-    Then I must be told "Adding prettier command"
-    And prettier script must be added for patterns "**/*.js"
-    Then I must be told "Running prettier"
-    And prettier must run using "npm run prettier"
+    Given yarn is not found
+    And project is under git control
+    Then installer must print "NPM detected"
+    Then installer must print "Installing prettier"
+    And prettier must be installed with "npm install -D prettier"
+    When prettier has been installed successfully
+    Then installer must print "Adding prettier script"
+    And prettier script must be added for "**/*.js"
+    When prettier script is added successfully
+    Then installer must print "Running prettier"
+    When prettier script has finished successfully
+    And prettier script must be executed
+    And installer must print "Committing changes"
     And changes must be committed
-
-  Scenario: With custom glob patterns
-    When I run prettier-install with arguments "**/*.js **/*.jsx"
-    Then prettier script must be added for patterns "**/*.js **/*.jsx"

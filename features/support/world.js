@@ -29,10 +29,34 @@ defineSupportCode(({ setWorldConstructor, Before, After }) => {
   Before(function () {
     const { client } = this;
 
-    spy(client.installsPrettier);
-    client.detectYarn.resolves(false);
+    spy(client.detectYarn);
+    client.detectYarn.returns(new Promise((resolve, reject) => {
+      Object.assign(client.detectYarn, { resolve, reject });
+    }));
+
+    spy(client.detectGit);
+    client.detectGit.returns(new Promise((resolve, reject) => {
+      Object.assign(client.detectGit, { resolve, reject });
+    }));
+
+    spy(client.installPrettier);
+    client.installPrettier.returns(new Promise((resolve, reject) => {
+      Object.assign(client.installPrettier, { resolve, reject });
+    }));
+
+    spy(client.addPrettierCommand);
+    client.addPrettierCommand.returns(new Promise((resolve, reject) => {
+      Object.assign(client.addPrettierCommand, { resolve, reject });
+    }));
+
+    spy(client.runPrettier);
+    client.runPrettier.returns(new Promise((resolve, reject) => {
+      Object.assign(client.runPrettier, { resolve, reject });
+    }));
 
     spy(client.commitChanges);
-    client.detectGit.resolves(false);
+    client.commitChanges.returns(new Promise((resolve, reject) => {
+      Object.assign(client.commitChanges, { resolve, reject });
+    }));
   });
 })
