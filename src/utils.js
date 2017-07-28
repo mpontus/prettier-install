@@ -45,14 +45,27 @@ async function directoryExists(path) {
 }
 
 async function modifyJson(filename, cb) {
-  const data = await readFile(filename);
-  const content = data.toString();
-  const original = JSON.parse(content);
-  const result = cb(original);
-  const { indent } = detectIndent(content);
-  const string = JSON.stringify(result, null, indent);
+  let data, indent;
 
-  return writeFile(filename, string);
+  try {
+    const buff = await readFile(filename);
+    const contentString = buff.toString();
+
+    data = JSON.parse(contentString);
+    ({ indent } = detectIndent(contentString));
+  } catch (error) {
+    if (error.code !== 'ENOENT') {
+      throw error;
+    }
+
+    data = {};
+    indent = 2;
+  }
+
+  const result = cb(data);
+  const resultString = JSON.stringify(result, null, indent);
+
+  return writeFile(filename, resultString);
 }
 
 module.exports = {

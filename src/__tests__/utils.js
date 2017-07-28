@@ -33,15 +33,21 @@ describe('modifyJson', () => {
   });
 
   it('must reject when read fails', () => {
-    const error = new Error('Write failed');
+    const exampleError = Object.assign(
+      new Error('permission denied'),
+      {
+        errno: -13,
+        code: 'EACCES',
+      },
+    );
 
     fs.readFile.mockImplementationOnce((filename, cb) => {
-      cb(error);
+      cb(exampleError);
     });
 
     const result = modifyJson('test.json', identity);
 
-    return expect(result).rejects.toBe(error);
+    return expect(result).rejects.toBe(exampleError);
   });
 
   it('must reject when JSON is malformed', () => {
@@ -83,7 +89,40 @@ describe('modifyJson', () => {
     return expect(result).rejects.toBe(error);
   })
 
-  it('modifies the structure of the file using callback', async () => {
+  it('passes empty object to callback when file does not exist', async () => {
+    const output = [
+      '{',
+      '  "foo": "bar"',
+      '}',
+    ].join('\n');
+    const fileNotFoundError = Object.assign(
+      new Error('no such file or directory'),
+      {
+        errno: -2,
+        code: 'ENOENT',
+      },
+    );
+    fs.readFile.mockImplementationOnce((filename, cb) => {
+      cb(fileNotFoundError);
+    });
+    fs.writeFile.mockImplementationOnce((filename, content, cb) => {
+      cb();
+    });
+
+    const result = await modifyJson('test.json', (data) => {
+      expect(data).toEqual({});
+
+      return { foo: 'bar' };
+    });
+
+    expect(fs.writeFile).toHaveBeenCalledWith(
+      'test.json',
+      output,
+      expect.any(Function)
+    );
+  });
+
+  it('passes json from the existing file to callback', async () => {
     const [input, output] = [
       [
         '{',
@@ -119,7 +158,7 @@ describe('modifyJson', () => {
       output,
       expect.any(Function)
     );
-    
+
     expect.assertions(3);
   });
 
