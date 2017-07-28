@@ -7,12 +7,7 @@ class Installer {
   }
 
   async run(options) {
-    let globPatterns = options.getGlobPatterns();
-
-    if (!globPatterns.length) {
-       globPatterns = ['**/*.js'];
-    }
-
+    const glob = options.getGlobPatterns();
     const useYarn = await this.client.detectYarn();
 
     if (useYarn) {
@@ -37,7 +32,9 @@ class Installer {
 
     this.feedback.say('Adding prettier script');
 
-    await this.client.addPrettierCommand(globPatterns.join(' '));
+    await this.client.addPrettierCommand(
+      glob.length ? glob.join(' ') : undefined
+    );
 
     this.feedback.say('Running prettier');
 

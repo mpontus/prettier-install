@@ -8,7 +8,7 @@ Feature: Installs prettier
     And prettier must be installed with "npm install -D prettier"
     When prettier has been installed successfully
     Then installer must print "Adding prettier script"
-    And prettier script must be added for "**/*.js"
+    And prettier script must be added for files "**/*.js"
     When prettier script is added successfully
     Then installer must print "Running prettier"
     And prettier script must be executed
@@ -23,7 +23,7 @@ Feature: Installs prettier
     And prettier must be installed with "yarn add --dev prettier"
     When prettier has been installed successfully
     Then installer must print "Adding prettier script"
-    And prettier script must be added for "**/*.js"
+    And prettier script must be added for files "**/*.js"
     When prettier script is added successfully
     Then installer must print "Running prettier"
     And prettier script must be executed
@@ -38,7 +38,7 @@ Feature: Installs prettier
     And prettier must be installed with "npm install -D prettier"
     When prettier has been installed successfully
     Then installer must print "Adding prettier script"
-    And prettier script must be added for "**/*.js"
+    And prettier script must be added for files "**/*.js"
     When prettier script is added successfully
     Then installer must print "Running prettier"
     When prettier script has finished successfully
