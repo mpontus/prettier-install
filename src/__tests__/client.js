@@ -11,6 +11,50 @@ describe('Client', () => {
     fs.__resetMocks();
   });
 
+  describe('detectUncommittedChanges', () => {
+    it('must run shell snippet', () => {
+      const client = new Client();
+
+      client.detectUncommittedChanges();
+
+      expect(childProcess.spawn).toHaveBeenCalledWith(
+        '/bin/sh',
+        ['-c', 'git diff-index --quiet HEAD --'],
+        { stdio: 'inherit' },
+      );
+    });
+
+    it('must return false when process exits successfuly', async () => {
+      const client = new Client();
+
+      childProcess.spawn.mockImplementationOnce(
+        () => ({
+          on: (event, callback) => event === 'exit' && callback(0),
+        })
+      )
+
+      const result = await client.detectUncommittedChanges();
+
+      expect(result).toBe(false);
+    });
+
+    it('must return true when process exits with non-zero exit code',
+      async () => {
+        const client = new Client();
+
+        childProcess.spawn.mockImplementationOnce(
+          () => ({
+            on: (event, callback) => event === 'exit' && callback(1),
+          })
+        )
+
+        const result = await client.detectUncommittedChanges();
+
+        expect(result).toBe(true);
+      }
+    );
+  })
+
   describe('installPrettier', () => {
     it('must run the supplied shell command', async () => {
       const client = new Client();

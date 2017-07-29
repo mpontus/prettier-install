@@ -20,6 +20,14 @@ class Installer {
     const useGit = await this.client.detectGit();
 
     if (useGit) {
+      const uncommittedChanges = await this.client.detectUncommittedChanges();
+
+      if (uncommittedChanges) {
+        this.feedback.say('Please commit your changes before proceeding')
+
+        throw new Error('Aborting due to uncommitted changes.');
+      }
+
       this.feedback.say('Git detected');
     }
 

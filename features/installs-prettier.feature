@@ -12,6 +12,8 @@ Feature: Installs prettier
     When prettier script is added successfully
     Then installer must print "Running prettier"
     And prettier script must be executed
+    When prettier script has finished successfully
+    Then installer must finish
 
   @options
   Scenario: Specifying custom prettier options
@@ -47,6 +49,8 @@ Feature: Installs prettier
       """
     When prettier script is added successfully
     Then prettier script must be executed
+    When prettier script has finished successfully
+    Then installer must finish
 
   @yarn
   Scenario: Installing prettier with Yarn
@@ -62,12 +66,15 @@ Feature: Installs prettier
     When prettier script is added successfully
     Then installer must print "Running prettier"
     And prettier script must be executed
+    When prettier script has finished successfully
+    Then installer must finish
 
   @git
   Scenario: Saving changes to Git
     When I run prettier-install
     Given yarn is not found
     And project is under git control
+    And there are no uncommitted changes
     Then installer must print "NPM detected"
     Then installer must print "Installing prettier"
     And prettier must be installed with "npm install -D prettier"
@@ -80,3 +87,17 @@ Feature: Installs prettier
     And prettier script must be executed
     And installer must print "Committing changes"
     And changes must be committed
+    When git finished successfully
+    Then installer must finish
+
+  @git @warning
+  Scenario: Uncommitted changes warning
+    When I run prettier-install
+    Given yarn is not found
+    And project is under git control
+    And there are uncommited changes
+    Then installer must print:
+      """
+      Please commit your changes before proceeding
+      """
+    And installer must exit

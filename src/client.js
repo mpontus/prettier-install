@@ -26,6 +26,16 @@ class Client {
     return directoryExists('.git');
   }
 
+  async detectUncommittedChanges() {
+    try {
+      await cmd('git diff-index --quiet HEAD --');
+
+      return false;
+    } catch (error) {
+      return true;
+    }
+  }
+
   installPrettier(command) {
     return cmd(command);
   }

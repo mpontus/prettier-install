@@ -1,6 +1,7 @@
 'use strict';
 const chai = require('chai');
 const sinonChai = require('sinon-chai');
+const chaiAsPromised = require("chai-as-promised");
 const { defineSupportCode } = require('cucumber');
 const { spy, createStubInstance } = require('sinon');
 const Client = require('../../src/client');
@@ -8,6 +9,7 @@ const Options = require('../../src/options');
 const Installer = require('../../src/installer');
 
 chai.use(sinonChai);
+chai.use(chaiAsPromised);
 
 class FeedbackMock {
   constructor() {
@@ -23,7 +25,7 @@ defineSupportCode(({ setWorldConstructor, Before, After }) => {
   setWorldConstructor(function () {
     this.client = createStubInstance(Client);
     this.feedback = new FeedbackMock();
-    this.installer = new Installer(this.client, this.feedback, this.options);
+    this.installer = new Installer(this.client, this.feedback);
   });
 
   Before(function () {
@@ -37,6 +39,11 @@ defineSupportCode(({ setWorldConstructor, Before, After }) => {
     spy(client.detectGit);
     client.detectGit.returns(new Promise((resolve, reject) => {
       Object.assign(client.detectGit, { resolve, reject });
+    }));
+
+    spy(client.detectUncommittedChanges);
+    client.detectUncommittedChanges.returns(new Promise((resolve, reject) => {
+      Object.assign(client.detectUncommittedChanges, { resolve, reject });
     }));
 
     spy(client.installPrettier);

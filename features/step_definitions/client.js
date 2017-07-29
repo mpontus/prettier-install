@@ -25,6 +25,18 @@ defineSupportCode(({ When, Then }) => {
     return this.client.detectGit();
   });
 
+  When('there are no uncommitted changes', function () {
+    this.client.detectUncommittedChanges.resolve(false);
+
+    return this.client.detectUncommittedChanges();
+  });
+
+  When('there are uncommited changes', function () {
+    this.client.detectUncommittedChanges.resolve(true);
+
+    return this.client.detectUncommittedChanges();
+  });
+
   When('prettier has been installed successfully', function () {
     this.client.installPrettier.resolve();
 
@@ -73,7 +85,7 @@ defineSupportCode(({ When, Then }) => {
     return this.client.addPrettierCommand().catch();
   });
 
-  When('git finshed successfully', function () {
+  When('git finished successfully', function () {
     this.client.commitChanges.resolve();
 
     return this.client.addPrettierCommand();
@@ -92,7 +104,7 @@ defineSupportCode(({ When, Then }) => {
   Then('prettier script must be added with arguments:',
     function (string) {
       const args = string.split('\n').join(' ');
-      
+
       expect(this.client.addPrettierCommand).to.have.been.calledWith(args);
     }
   );

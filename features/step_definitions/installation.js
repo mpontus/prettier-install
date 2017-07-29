@@ -3,14 +3,17 @@ const { defineSupportCode } = require('cucumber');
 const { expect } = require('chai');
 const Options = require('../../src/options');
 
-defineSupportCode(({ Given, When, Then }) => {
-  When('I run prettier-install',
-    function () {
-      const options = new Options(['node', 'prettier-install']);
+function noop() {};
 
-      this.installer.run(options);
-    }
-  );
+defineSupportCode(({ Given, When, Then }) => {
+  When('I run prettier-install', function () {
+    const options = new Options(['node', 'prettier-install']);
+
+    this.finished = this.installer.run(options);
+
+    // Prevent unhandled rejection warning.
+    this.finished.catch(noop);
+  });
 
   When('I run prettier-install with arguments {stringInDoubleQuotes}',
     function (args) {
@@ -20,7 +23,10 @@ defineSupportCode(({ Given, When, Then }) => {
         ...args.split(/\s+/)
       ]);
 
-      this.installer.run(options);
+      this.finished = this.installer.run(options);
+
+      // Prevent unhandled rejection warning.
+      this.finished.catch(noop);
     }
   );
 
@@ -32,7 +38,18 @@ defineSupportCode(({ Given, When, Then }) => {
         ...args.split(/\s+/)
       ]);
 
-      this.installer.run(options);
+      this.finished = this.installer.run(options);
+
+      // Prevent unhandled rejection warning.
+      this.finished.catch(noop);
     }
   );
+
+  Then('installer must finish', function () {
+    expect(this.finished).to.be.fulfilled;
+  });
+
+  Then('installer must exit', function () {
+    expect(this.finished).to.be.rejected
+  });
 });
