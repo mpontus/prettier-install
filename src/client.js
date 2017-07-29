@@ -35,6 +35,11 @@ class Client {
       set('scripts.prettier', `prettier --write ${glob}`));
   }
 
+  writePrettierRc(options) {
+    return modifyJson('.prettierrc', origin =>
+      Object.assign({}, origin, options ));
+  }
+
   runPrettier(command) {
     return cmd(command);
   }

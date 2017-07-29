@@ -24,8 +24,8 @@ const writeFile = jest.fn(function (filename, data, callback) {
 
 function __resetMocks() {
   __mockFiles = {};
-  readFile.mockRestore();
-  writeFile.mockRestore();
+  readFile.mockClear();
+  writeFile.mockClear();
 }
 
 module.exports = fs;
