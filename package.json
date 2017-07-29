@@ -1,9 +1,8 @@
 {
   "name": "prettier-install",
   "version": "0.1.0",
-  "description": "Introduce prettier to your project with this simple CLI utility",
-  "main": "index.js",
-  "repository": "https://github.com/mpontus/prettier-install",
+  "description": "Simple tool for introducing prettier into your project",
+  "repository": "mpontus/prettier-install",
   "author": "Mikhail Pontus",
   "license": "MIT",
   "dependencies": {
@@ -25,5 +24,8 @@
   },
   "scripts": {
     "test": "jest && cucumber-js"
+  },
+  "bin": {
+    "prettier-install": "./bin/prettier-install.js"
   }
 }
