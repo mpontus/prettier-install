@@ -39,7 +39,7 @@ describe('Client', () => {
         }`
       );
 
-      await client.addPrettierCommand();
+      await client.addPrettierCommand('foo');
 
       expect(fs.writeFile).toHaveBeenCalledWith(
         'package.json',
@@ -47,7 +47,7 @@ describe('Client', () => {
           "name": "foo-package",
           "scripts": {
             "test": "jest",
-            "prettier": "prettier --write **/*.js"
+            "prettier": "prettier --write foo"
           }
         }`,
         expect.any(Function),
@@ -67,7 +67,7 @@ describe('Client', () => {
         }`
       );
 
-      await client.addPrettierCommand();
+      await client.addPrettierCommand('foo');
 
       expect(fs.writeFile).toHaveBeenCalledWith(
         'package.json',
@@ -75,40 +75,12 @@ describe('Client', () => {
             "name": "foo-package",
             "scripts": {
                 "test": "jest",
-                "prettier": "prettier --write **/*.js"
+                "prettier": "prettier --write foo"
             }
         }`,
         expect.any(Function),
       )
     });
-
-    it('allows specifying custom glob pattern', async () => {
-      const client = new Client();
-
-      fs.__setMockFile(
-        'package.json',
-        dedent`{
-            "name": "foo-package",
-            "scripts": {
-                "test": "jest"
-            }
-        }`
-      );
-
-      await client.addPrettierCommand('{src,__tests__}/**/.js **/*.jsx');
-
-      expect(fs.writeFile).toHaveBeenCalledWith(
-        'package.json',
-        dedent`{
-            "name": "foo-package",
-            "scripts": {
-                "test": "jest",
-                "prettier": "prettier --write {src,__tests__}/**/.js **/*.jsx"
-            }
-        }`,
-        expect.any(Function),
-      )
-    })
   });
 
   describe('runPrettier', () => {

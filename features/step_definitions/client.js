@@ -89,12 +89,21 @@ defineSupportCode(({ When, Then }) => {
     expect(this.client.installPrettier).to.have.been.calledWith(cmd);
   });
 
-  Then('prettier script must be added for files {stringInDoubleQuotes}', function (glob) {
-    const defaultGlob = '**/*.js';
-    const expected = glob !== defaultGlob ? glob : undefined;
+  Then('prettier script must be added with arguments:',
+    function (string) {
+      const args = string.split('\n').join(' ');
+      
+      expect(this.client.addPrettierCommand).to.have.been.calledWith(args);
+    }
+  );
 
-    expect(this.client.addPrettierCommand).to.have.been.calledWith(expected);
-  });
+  Then('prettier script must be added with arguments {stringInDoubleQuotes}',
+    function (string) {
+      const args = string.split('\n').join(' ');
+
+      expect(this.client.addPrettierCommand).to.have.been.calledWith(args);
+    }
+  );
 
   Then('.prettierrc must be updated with options:', function (string) {
     const expected = JSON.parse(string);

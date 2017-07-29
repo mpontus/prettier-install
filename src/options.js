@@ -1,32 +1,42 @@
-const { Command } = require('commander');
+const minimist = require('minimist');
 const { pickBy, negate, isUndefined } = require('lodash/fp');
 
 const isDefined = negate(isUndefined);
 const pickDefined = pickBy(isDefined);
 
+const parserOptions = {
+  alias: {
+    'print-width': 'printWidth',
+    'tab-width': 'tabWidth',
+    'trailing-comma': 'trailingComma',
+    'use-tabs': 'useTabs',
+    'single-quote': 'singleQuote',
+    'bracket-spacing': 'bracketSpacing',
+    'jsx-bracket-same-line': 'jsxBracketSameLine',
+  },
+  default: {
+    semi: true,
+    'bracket-spacing': true,
+  }
+};
+
 class Options {
   constructor(argv) {
-    this.program = new Command();
-    this.program
-      .version('0.0.1')
-      .option('--print-width [int]', 'Maximum line length', parseInt)
-      .option('--tab-width [int]', 'Indentation width', parseInt)
-      .option('--use-tabs', 'Use tabs for indentation')
-      .option('--no-semi', 'Omit semicolons')
-      .option('--single-quote', 'Use single quotes for strings')
-      .option('--trailing-comma [syntax]', 'Print trailing commas (none, es5, all)')
-      .option('--no-bracket-spacing',
-        'Omit spaces between brackets in object literals')
-      .option('--jsx-bracket-same-line',
-        'Puts closing > on the end of the last line')
-      .parse(argv);
+    this.argv = argv;
   }
 
+  /**
+   * Returns glob patterns passed as trailing arguments to prettier-install
+   */
   getGlobPatterns() {
-    return this.program.args;
+    return minimist(this.argv)._.slice(2);
   }
 
+  /**
+   * Returns an object of options recognized by prettier from own arguments.
+   */
   getPrettierOptions() {
+    const parsedArguments = minimist(this.argv, parserOptions);
     const {
       printWidth,
       tabWidth,
@@ -36,9 +46,9 @@ class Options {
       trailingComma,
       bracketSpacing,
       jsxBracketSameLine,
-    } = this.program;
+    } = parsedArguments;
 
-    const options = {
+    const prettierOptions = {
       printWidth,
       tabWidth,
       useTabs,
@@ -49,13 +59,42 @@ class Options {
       jsxBracketSameLine,
     };
 
-    const explicitOptions = pickDefined(options);
-
-    if (Object.keys(explicitOptions).length === 0) {
-      return null;
-    }
+    const explicitOptions = pickDefined(prettierOptions);
 
     return explicitOptions;
+  }
+
+  /**
+   * Returns a string containing arguments to be passed to prettier executable.
+   */
+  getPrettierArguments() {
+    const explicitOptions = this.getPrettierOptions();
+
+    const {
+      printWidth,
+      tabWidth,
+      useTabs,
+      semi,
+      singleQuote,
+      trailingComma,
+      bracketSpacing,
+      jsxBracketSameLine,
+    } = explicitOptions;
+
+    const args = [
+      printWidth && `--print-width ${printWidth}`,
+      tabWidth && `--tab-width ${tabWidth}`,
+      useTabs && '--use-tabs',,
+      semi === false && '--no-semi',
+      singleQuote && '--single-quote',
+      trailingComma && `--trailing-comma ${trailingComma}`,
+      bracketSpacing === false && '--no-bracket-spacing',
+      jsxBracketSameLine && '--jsx-bracket-same-line',
+    ]
+      .filter(Boolean)
+      .join(' ');
+
+    return args;
   }
 }
 

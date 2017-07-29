@@ -30,9 +30,9 @@ class Client {
     return cmd(command);
   }
 
-  addPrettierCommand(glob = '**/*.js') {
+  addPrettierCommand(args) {
     return modifyJson('package.json',
-      set('scripts.prettier', `prettier --write ${glob}`));
+      set('scripts.prettier', `prettier --write ${args}`));
   }
 
   runPrettier(command) {
