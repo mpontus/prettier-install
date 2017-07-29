@@ -49,6 +49,18 @@ defineSupportCode(({ When, Then }) => {
     return this.client.addPrettierCommand().catch();
   });
 
+  When('.prettierrc was successfully written', function () {
+    this.client.writePrettierRc.resolve();
+
+    return this.client.writePrettierRc();
+  });
+
+  When('.prettierrc has failed to write', function () {
+    this.client.writePrettierRc.reject(new Error('foo'));
+
+    return this.client.writePrettierRc().catch();
+  });
+
   When('prettier script has finished successfully', function () {
     this.client.runPrettier.resolve();
 
@@ -82,6 +94,12 @@ defineSupportCode(({ When, Then }) => {
     const expected = glob !== defaultGlob ? glob : undefined;
 
     expect(this.client.addPrettierCommand).to.have.been.calledWith(expected);
+  });
+
+  Then('.prettierrc must be updated with options:', function (string) {
+    const expected = JSON.parse(string);
+
+    expect(this.client.writePrettierRc).to.have.been.calledWith(expected);
   });
 
   Then('prettier script must be executed', function () {

@@ -13,6 +13,45 @@ Feature: Installs prettier
     Then installer must print "Running prettier"
     And prettier script must be executed
 
+  @options
+  Scenario: Specifying custom prettier options
+    When I run prettier-install with arguments:
+      """
+      --print-width 120
+      --tab-width 8
+      --use-tabs
+      --no-semi
+      --single-quote
+      --trailing-comma es5
+      --no-bracket-spacing
+      --jsx-bracket-same-line
+      """
+    Given yarn is not found
+    And project is not under git control
+    Then installer must print "NPM detected"
+    Then installer must print "Installing prettier"
+    And prettier must be installed with "npm install -D prettier"
+    When prettier has been installed successfully
+    Then installer must print "Adding prettier script"
+    And prettier script must be added for files "**/*.js"
+    When prettier script is added successfully
+    Then .prettierrc must be updated with options:
+      """
+      {
+        "printWidth": 120,
+        "tabWidth": 8,
+        "useTabs": true,
+        "semi": false,
+        "singleQuote": true,
+        "trailingComma": "es5",
+        "bracketSpacing": false,
+        "jsxBracketSameLine": true
+      }
+      """
+    When .prettierrc was successfully written
+    Then prettier script must be executed
+
+
   @yarn
   Scenario: Installing prettier with Yarn
     When I run prettier-install

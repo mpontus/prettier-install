@@ -49,6 +49,11 @@ defineSupportCode(({ setWorldConstructor, Before, After }) => {
       Object.assign(client.addPrettierCommand, { resolve, reject });
     }));
 
+    spy(client.writePrettierRc);
+    client.writePrettierRc.returns(new Promise((resolve, reject) => {
+      Object.assign(client.writePrettierRc, { resolve, reject });
+    }));
+
     spy(client.runPrettier);
     client.runPrettier.returns(new Promise((resolve, reject) => {
       Object.assign(client.runPrettier, { resolve, reject });

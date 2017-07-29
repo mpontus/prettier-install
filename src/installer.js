@@ -8,6 +8,7 @@ class Installer {
 
   async run(options) {
     const glob = options.getGlobPatterns();
+    const prettierOptions = options.getPrettierOptions();
     const useYarn = await this.client.detectYarn();
 
     if (useYarn) {
@@ -35,6 +36,12 @@ class Installer {
     await this.client.addPrettierCommand(
       glob.length ? glob.join(' ') : undefined
     );
+
+    if (prettierOptions) {
+      this.feedback.say('Writing prettier config');
+
+      await this.client.writePrettierRc(prettierOptions);
+    }
 
     this.feedback.say('Running prettier');
 

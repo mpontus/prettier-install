@@ -20,7 +20,19 @@ defineSupportCode(({ Given, When, Then }) => {
         ...args.split(/\s+/)
       ]);
 
-      return this.installer.run(options);
+      this.installer.run(options);
+    }
+  );
+
+  When('I run prettier-install with arguments:', function (string) {
+      const args = string.split("\n").join(" ");
+      const options = new Options([
+        'node',
+        'prettier-install',
+        ...args.split(/\s+/)
+      ]);
+
+      this.installer.run(options);
     }
   );
 });
