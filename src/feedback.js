@@ -1,5 +1,3 @@
-const tty = require('tty');
-
 class Feedback {
   constructor(stdin, stdout) {
     this.stdin = stdin;
@@ -11,12 +9,12 @@ class Feedback {
   }
 
   prompt(msg) {
-    tty.setRawMode(true);
     this.stdout.write(`${msg} [yn]`);
+    this.stdin.setRawMode(true);
 
     return new Promise((resolve, reject) => {
       this.stdin.on('data', (key) => {
-        switch (key) {
+        switch (key.toString()) {
           case 'y':
             resolve(true);
 
@@ -30,12 +28,12 @@ class Feedback {
           default: return;
         }
 
-        tty.setRawMode(false);
         this.stdout.write('\n');
+        this.stdin.setRawMode(false);
       });
 
       this.stdin.on('end', () => {
-        tty.setRawMode(false);
+        this.stdin.setRawMode(false);
 
         reject(new Error('STDIN closed'));
       });

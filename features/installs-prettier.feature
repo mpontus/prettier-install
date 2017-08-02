@@ -94,10 +94,38 @@ Feature: Installs prettier
   Scenario: Uncommitted changes warning
     When I run prettier-install
     Given yarn is not found
+    Then installer must print "NPM detected"
+    Given project is under git control
+    Then installer must print "Git detected"
+    And there are uncommited changes
+    Then installer must ask:
+      """
+      Working tree contains uncommitted changes. Proceed anyway?
+      """
+    When I answer "y"
+    Then installer must print "Installing prettier"
+    And prettier must be installed with "npm install -D prettier"
+    When prettier has been installed successfully
+    Then installer must print "Adding prettier script"
+    And prettier script must be added with arguments "**/*.js"
+    When prettier script is added successfully
+    Then installer must print "Running prettier"
+    When prettier script has finished successfully
+    And prettier script must be executed
+    And installer must print "Committing changes"
+    And changes must be committed
+    When git finished successfully
+    Then installer must finish
+
+  Scenario: Uncommitted changes error
+    When I run prettier-install
+    Given yarn is not found
     And project is under git control
     And there are uncommited changes
-    Then installer must print:
+    Then installer must ask:
       """
-      Please commit your changes before proceeding
+      Working tree contains uncommitted changes. Proceed anyway?
       """
-    And installer must exit
+    When I answer "n"
+    Then installer must print "Aborting"
+    Then installer must exit
