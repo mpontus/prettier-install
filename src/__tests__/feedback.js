@@ -1,8 +1,5 @@
-const tty = require('tty');
 const stream = require('stream');
 const Feedback = require('../feedback');
-
-jest.mock('tty');
 
 function noop() {};
 
@@ -18,15 +15,12 @@ function mockStdin() {
   const stdin = new stream.Readable();
 
   stdin._read = noop;
+  stdin.setRawMode = jest.fn();
 
   return stdin;
 }
 
 describe('Feedback', () => {
-  beforeEach(() => {
-    tty.setRawMode.mockClear();
-  });
-
   describe('say', () => {
     it('should print the message', () => {
       const stdin = mockStdin();
@@ -70,7 +64,7 @@ describe('Feedback', () => {
 
       feedback.prompt('Foo?');
 
-      expect(tty.setRawMode).toHaveBeenCalledWith(true);
+      expect(stdin.setRawMode).toHaveBeenCalledWith(true);
     });
 
     it('should resolve to true after accepting the positive answer', () => {
@@ -116,13 +110,13 @@ describe('Feedback', () => {
       const feedback = new Feedback(stdin, stdout);
       const result = feedback.prompt('Foo?');
 
-      tty.setRawMode.mockClear();
+      stdin.setRawMode.mockClear();
 
       stdin.emit('data', 'n');
 
       await result;
 
-      expect(tty.setRawMode).toHaveBeenCalledWith(false);
+      expect(stdin.setRawMode).toHaveBeenCalledWith(false);
     })
 
     it('should reject if stream closes before providing the answer', () => {
@@ -144,13 +138,13 @@ describe('Feedback', () => {
       const feedback = new Feedback(stdin, stdout);
       const result = feedback.prompt('Foo?');
 
-      tty.setRawMode.mockClear();
+      stdin.setRawMode.mockClear();
 
       stdin.emit('end');
 
       await result.catch(noop);
 
-      expect(tty.setRawMode).toHaveBeenCalledWith(false);
+      expect(stdin.setRawMode).toHaveBeenCalledWith(false);
     })
   })
 })
