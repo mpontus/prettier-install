@@ -4,7 +4,9 @@ const sinonChai = require('sinon-chai');
 const chaiAsPromised = require("chai-as-promised");
 const { defineSupportCode } = require('cucumber');
 const { spy, createStubInstance } = require('sinon');
+const { Writable, Transform } = require('stream');
 const Client = require('../../src/client');
+const Feedback = require('../../src/feedback');
 const Options = require('../../src/options');
 const Installer = require('../../src/installer');
 
@@ -13,23 +15,52 @@ chai.use(chaiAsPromised);
 
 class FeedbackMock {
   constructor() {
-    this.messages = '';
+    this.buffer = '';
   }
 
   say(message) {
-    this.messages += `${message}\n`;
+    this.buffer += `${message}\n`;
   }
+
+  setRawMode() {}
+}
+
+class StdoutMock extends Writable {
+  constructor(options) {
+    super(options);
+
+    this.buffer = '';
+  }
+
+  _write(data, encoding, callback) {
+    this.buffer += `${data}\n`;
+
+    callback();
+  }
+}
+
+class StdinMock extends Transform {
+  _transform(data, encoding, callback) {
+    this.push(data);
+
+    callback();
+  }
+
+  setRawMode() {}
 }
 
 defineSupportCode(({ setWorldConstructor, Before, After }) => {
   setWorldConstructor(function () {
+    this.stdout = new StdoutMock();
+    this.stdin = new StdinMock();
+
     this.client = createStubInstance(Client);
-    this.feedback = new FeedbackMock();
+    this.feedback = new Feedback(this.stdin, this.stdout);
     this.installer = new Installer(this.client, this.feedback);
   });
 
   Before(function () {
-    const { client } = this;
+    const { client, feedback } = this;
 
     spy(client.detectYarn);
     client.detectYarn.returns(new Promise((resolve, reject) => {
@@ -65,5 +96,7 @@ defineSupportCode(({ setWorldConstructor, Before, After }) => {
     client.commitChanges.returns(new Promise((resolve, reject) => {
       Object.assign(client.commitChanges, { resolve, reject });
     }));
+
+    spy(feedback, 'prompt');
   });
 })

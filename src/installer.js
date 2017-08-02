@@ -20,15 +20,21 @@ class Installer {
     const useGit = await this.client.detectGit();
 
     if (useGit) {
+      this.feedback.say('Git detected');
+
       const uncommittedChanges = await this.client.detectUncommittedChanges();
 
       if (uncommittedChanges) {
-        this.feedback.say('Please commit your changes before proceeding')
+        const proceedAnyway = await this.feedback.prompt(
+          'Working tree contains uncommitted changes. Proceed anyway?',
+        );
 
-        throw new Error('Aborting due to uncommitted changes.');
+        if (!proceedAnyway) {
+          this.feedback.say('Aborting');
+
+          throw new Error('Aborting due to uncommitted changes.');
+        }
       }
-
-      this.feedback.say('Git detected');
     }
 
     this.feedback.say('Installing prettier');
