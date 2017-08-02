@@ -7,7 +7,7 @@ const Options = require('../src/options');
 
 const options = new Options(process.argv);
 const client = new Client();
-const feedback = new Feedback();
+const feedback = new Feedback(process.stdin, process.stdout);
 const installer = new Installer(client, feedback);
 
 installer.run(options)
