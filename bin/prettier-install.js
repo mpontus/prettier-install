@@ -11,6 +11,7 @@ const feedback = new Feedback(process.stdin, process.stdout);
 const installer = new Installer(client, feedback);
 
 installer.run(options)
-  .catch(() => {
+  .catch((error) => {
+    console.error(error);
     process.exit(1);
   })

@@ -3,9 +3,10 @@ Feature: Installs prettier
     When I run prettier-install
     Given yarn is not found
     And project is not under git control
+    And eslint is not installed
     Then installer must print "NPM detected"
     Then installer must print "Installing prettier"
-    And prettier must be installed with "npm install -D prettier"
+    And prettier must be installed using "npm"
     When prettier has been installed successfully
     Then installer must print "Adding prettier script"
     And prettier script must be added with arguments "**/*.js"
@@ -30,9 +31,10 @@ Feature: Installs prettier
       """
     Given yarn is not found
     And project is not under git control
+    And eslint is not installed
     Then installer must print "NPM detected"
     Then installer must print "Installing prettier"
-    And prettier must be installed with "npm install -D prettier"
+    And prettier must be installed using "npm"
     When prettier has been installed successfully
     Then installer must print "Adding prettier script"
     And prettier script must be added with arguments:
@@ -57,9 +59,10 @@ Feature: Installs prettier
     When I run prettier-install
     Given yarn is found
     And project is not under git control
+    And eslint is not installed
     Then installer must print "Yarn detected"
     Then installer must print "Installing prettier"
-    And prettier must be installed with "yarn add --dev prettier"
+    And prettier must be installed using "yarn"
     When prettier has been installed successfully
     Then installer must print "Adding prettier script"
     And prettier script must be added with arguments "**/*.js"
@@ -74,10 +77,11 @@ Feature: Installs prettier
     When I run prettier-install
     Given yarn is not found
     And project is under git control
+    And eslint is not installed
     And there are no uncommitted changes
     Then installer must print "NPM detected"
     Then installer must print "Installing prettier"
-    And prettier must be installed with "npm install -D prettier"
+    And prettier must be installed using "npm"
     When prettier has been installed successfully
     Then installer must print "Adding prettier script"
     And prettier script must be added with arguments "**/*.js"
@@ -97,6 +101,7 @@ Feature: Installs prettier
     Then installer must print "NPM detected"
     Given project is under git control
     Then installer must print "Git detected"
+    And eslint is not installed
     And there are uncommited changes
     Then installer must ask:
       """
@@ -104,7 +109,7 @@ Feature: Installs prettier
       """
     When I answer "y"
     Then installer must print "Installing prettier"
-    And prettier must be installed with "npm install -D prettier"
+    And prettier must be installed using "npm"
     When prettier has been installed successfully
     Then installer must print "Adding prettier script"
     And prettier script must be added with arguments "**/*.js"
@@ -121,6 +126,7 @@ Feature: Installs prettier
     When I run prettier-install
     Given yarn is not found
     And project is under git control
+    And eslint is not installed
     And there are uncommited changes
     Then installer must ask:
       """
@@ -129,3 +135,23 @@ Feature: Installs prettier
     When I answer "n"
     Then installer must print "Aborting"
     Then installer must exit
+
+  @eslint
+  Scenario: Eslint integration
+    When I run prettier-install
+    Given yarn is not found
+    And project is not under git control
+    And eslint is installed
+    Then installer must print "NPM detected"
+    Then installer must print "Installing prettier"
+    And prettier must be installed using "npm"
+    When prettier has been installed successfully
+    Then installer must print "Adding prettier script"
+    And prettier script must be added with arguments "**/*.js"
+    When prettier script is added successfully
+    Then eslint extras must be installed
+    When eslint extras were successfuly installed
+    Then installer must print "Running prettier"
+    And prettier script must be executed
+    When prettier script has finished successfully
+    And installer must finish

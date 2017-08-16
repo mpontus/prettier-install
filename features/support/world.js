@@ -97,6 +97,16 @@ defineSupportCode(({ setWorldConstructor, Before, After }) => {
       Object.assign(client.commitChanges, { resolve, reject });
     }));
 
+    spy(client.detectEslint);
+    client.detectEslint.returns(new Promise((resolve, reject) => {
+      Object.assign(client.detectEslint, { resolve, reject });
+    }));
+
+    spy(client.installEslintExtras);
+    client.installEslintExtras.returns(new Promise((resolve, reject) => {
+      Object.assign(client.installEslintExtras, { resolve, reject });
+    }));
+
     spy(feedback, 'prompt');
   });
 })

@@ -187,4 +187,4 @@ describe('modifyJson', () => {
       expect.any(Function)
     );
   });
-})
+});

@@ -39,11 +39,7 @@ class Installer {
 
     this.feedback.say('Installing prettier');
 
-    await this.client.installPrettier(
-      useYarn
-        ? 'yarn add --dev prettier'
-        : 'npm install -D prettier'
-    );
+    await this.client.installPrettier(useYarn ? 'yarn' : 'npm');
 
     this.feedback.say('Adding prettier script');
 
@@ -52,6 +48,12 @@ class Installer {
         glob.length ? glob : ['**/*.js']
       ).filter(Boolean).join(' ')
     );
+
+    if (await this.client.detectEslint()) {
+      this.feedback.say('Integrating eslint');
+
+      await this.client.installEslintExtras(useYarn ? 'yarn' : 'npm');
+    }
 
     this.feedback.say('Running prettier');
 

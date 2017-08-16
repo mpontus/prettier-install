@@ -34,6 +34,16 @@ function cmd(command) {
   });
 };
 
+async function fileExists(path) {
+  try {
+    const stats = await stat(path);
+
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
+
 async function directoryExists(path) {
   try {
     const stats = await stat(path);
@@ -42,6 +52,12 @@ async function directoryExists(path) {
   } catch (error) {
     return false;
   }
+}
+
+async function readJson(filename) {
+  const buff = await readFile(filename);
+
+  return JSON.parse(buff.toString());
 }
 
 async function modifyJson(filename, cb) {
@@ -68,8 +84,14 @@ async function modifyJson(filename, cb) {
   return writeFile(filename, resultString);
 }
 
+async function modifyEslintJs(updateConfig) {
+
+}
+
 module.exports = {
   cmd,
+  readJson,
   modifyJson,
+  fileExists,
   directoryExists,
 };

@@ -97,8 +97,26 @@ defineSupportCode(({ When, Then }) => {
     return this.client.addPrettierCommand().catch();
   });
 
-  Then('prettier must be installed with {stringInDoubleQuotes}', function (cmd) {
-    expect(this.client.installPrettier).to.have.been.calledWith(cmd);
+  When('eslint is installed', function () {
+    this.client.detectEslint.resolve(true);
+
+    return this.client.detectEslint();
+  });
+
+  When('eslint is not installed', function () {
+    this.client.detectEslint.resolve(false);
+
+    return this.client.detectEslint();
+  });
+
+  When('eslint extras were successfuly installed', function () {
+    this.client.installEslintExtras.resolve();
+
+    return this.client.installEslintExtras();
+  });
+
+  Then('prettier must be installed using {stringInDoubleQuotes}', function (packager) {
+    expect(this.client.installPrettier).to.have.been.calledWith(packager);
   });
 
   Then('prettier script must be added with arguments:',
@@ -129,5 +147,9 @@ defineSupportCode(({ When, Then }) => {
 
   Then('changes must be committed', function () {
     expect(this.client.commitChanges).to.have.been.called;
+  });
+
+  Then('eslint extras must be installed', function () {
+    expect(this.client.installEslintExtras).to.have.been.called;
   });
 });
