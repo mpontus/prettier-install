@@ -1,25 +1,28 @@
-class Environment {
-  getDependencies() {
+// TODO: try fs-extra
+import { promisify } from 'util';
+import { readFile } from 'fs';
+
+export default class Environment {
+  async getProjectDependencies() {
+    const projectMetadataContents = await promisify(readFile)('package.json', 'utf-8');
+    const projectMetadata = JSON.parse(projectMetadataContents);
+    const { dependencies, devDependencies } = projectMetadata;
+
+    return {
+      ...dependencies,
+      ...devDependencies,
+    };
+  }
+
+  getInstalledModules() {
 
   }
 
-  getInstalledPackages() {
-
-  }
-  
-  getCommands() {
+  getPackageScripts() {
 
   }
 
-  fileExists() {
-
-  }
-
-  fileWritable() {
-
-  }
-
-  directoryExists() {
+  pathExists() {
 
   }
 
@@ -28,7 +31,11 @@ class Environment {
   }
 
   isCleanWorkingTree() {
-    
+
+  }
+
+  findEslintrc() {
+
   }
 
   eslintPresets() {
