@@ -33,19 +33,13 @@ export default class Environment {
   }
 
   findEslintrc() {
-    const fileExists = async (filename) => {
-      const result = await promisify(access)(filename)
-        .then(() => true, () => false);
-      return result;
-    }
+    const fileExists = filename =>
+      promisify(access)(filename)
+        .then(() => true, () => false)
 
-    const jsonFileHasSection = section => async (filename) => {
-      const contents = await promisify(readFile)(filename);
-      const json = JSON.parse(contents);
-      const result = section in json;
-
-      return result;
-    }
+    const jsonFileHasSection = section => filename =>
+      promisify(readFile)(filename)
+        .then(contents => section in JSON.parse(contents));
 
     const files = [
       '.eslintrc.js',
@@ -65,22 +59,12 @@ export default class Environment {
       'package.json': [fileExists, jsonFileHasSection('eslintConfig')],
     };
 
-
     return files.reduceRight(
-      (next, path) => {
-        return () => {
-          return tests[path].reduceRight(
-            (next, pred) => {
-              return () => {
-                return pred(path).then(result => {
-                  return result && next();
-                });
-              };
-            },
-            () => Promise.resolve(true),
-          )().then(result => result ? path : next());
-        };
-      },
+      (next, path) => () => tests[path].reduceRight(
+          (next, pred) => () => pred(path)
+            .then(result => result && next()),
+          () => Promise.resolve(true),
+        )().then(result => result ? path : next()),
       () => Promise.resolve(null),
     )();
   }
