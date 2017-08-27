@@ -33,13 +33,19 @@ export default class Environment {
   }
 
   findEslintrc() {
-    const fileExists = filename =>
-      promisify(access)(filename)
+    const fileExists = async (filename) => {
+      const result = await promisify(access)(filename)
         .then(() => true, () => false);
+      return result;
+    }
 
-    const jsonFileHasSection = section => filename =>
-      promisify(readFile)(filename)
-        .then(contents => section in JSON.parse(contents));
+    const jsonFileHasSection = section => async (filename) => {
+      const contents = await promisify(readFile)(filename);
+      const json = JSON.parse(contents);
+      const result = section in json;
+
+      return result;
+    }
 
     const files = [
       '.eslintrc.js',
@@ -56,15 +62,26 @@ export default class Environment {
       '.eslintrc.yml': [fileExists],
       '.eslintrc.json': [fileExists],
       '.eslintrc': [fileExists],
-      'package.json': [fileExists, jsonFileHasSection('eslintrcConfig')],
+      'package.json': [fileExists, jsonFileHasSection('eslintConfig')],
     };
 
+
     return files.reduceRight(
-      (next, path) => tests[path].reduceRight(
-        (next, pred) => pred(path).then(result => result && next()),
-        () => Promise.resolve(true),
-      )().then(result => result ? path : next()),
-      () => Primise.resolve(null),
+      (next, path) => {
+        return () => {
+          return tests[path].reduceRight(
+            (next, pred) => {
+              return () => {
+                return pred(path).then(result => {
+                  return result && next();
+                });
+              };
+            },
+            () => Promise.resolve(true),
+          )().then(result => result ? path : next());
+        };
+      },
+      () => Promise.resolve(null),
     )();
   }
 
