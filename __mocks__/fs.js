@@ -58,7 +58,7 @@ const access = jest.fn((path, mode, callback) => {
     return;
   }
 
-  if (mode && (fileAccess & mode)) {
+  if (mode && !(fileAccess & mode)) {
     callback(_eaccesError());
 
     return;

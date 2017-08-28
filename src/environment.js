@@ -1,44 +1,82 @@
 // TODO: try fs-extra
 import R from 'ramda';
 import { promisify } from 'util';
-import { access, readFile, readDir } from 'fs';
+import path from 'path';
+import fs from 'fs';
+import childProcess from 'child_process';
 
 export default class Environment {
   async getProjectDependencies() {
-    const projectMetadataContents = await promisify(readFile)('package.json', 'utf-8');
-    const projectMetadata = JSON.parse(projectMetadataContents);
+    let projectMetadata;
+
+    try {
+      const projectMetadataContents = await promisify(fs.readFile)('package.json', 'utf8');
+
+      projectMetadata = JSON.parse(projectMetadataContents);
+    } catch (error) {
+      return {};
+    }
+
     const { dependencies, devDependencies } = projectMetadata;
 
     return Object.assign({}, dependencies, devDependencies);
   }
 
   getInstalledModules() {
-    return promisify(readDir)('node_modules');
+    return promisify(fs.readDir)('node_modules');
   }
 
-  getPackageScripts() {
+  async getPackageScripts() {
+    let projectMetadata;
 
+    try {
+      const projectMetadataContents = await promisify(fs.readFile)('package.json', 'utf8');
+
+      projectMetadata = JSON.parse(projectMetadataContents);
+    } catch (error) {
+      return {};
+    }
+
+
+    return projectMetadata.scripts || {};
   }
 
-  pathExists() {
-
+  pathExists(path) {
+    return promisify(fs.access)(path)
+      .then(() => true, () => false);
   }
 
-  findExecutable() {
+  findExecutable(name) {
+    const isExecutable = path =>
+    promisify(fs.access)(path, fs.constants.X_OK);
 
+    return process.env.PATH.split(':').map(
+      dir => path.resolve(dir, name),
+    ).reduceRight(
+      (next, path) => () => isExecutable(path)
+        .then(() => path, () => next()),
+      () => Promise.resolve(null),
+    )();
   }
 
   isCleanWorkingTree() {
+    return promisify(childProcess.exec)('git diff-index --quiet HEAD --')
+      .then(() => true, (error) => {
+        if (error.code === 1) {
+          return false;
+        }
 
+        return Promise.reject(error);
+      });
   }
 
   findEslintrc() {
     const fileExists = filename =>
-      promisify(access)(filename)
+      promisify(fs.access)(filename)
         .then(() => true, () => false)
 
     const jsonFileHasSection = section => filename =>
-      promisify(readFile)(filename)
+      promisify(fs.readFile)(filename)
         .then(contents => section in JSON.parse(contents));
 
     const files = [

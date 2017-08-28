@@ -1,6 +1,3 @@
-'use strict';
-const { EventEmitter } = require('events');
-
 const childProcess = jest.genMockFromModule('child_process');
 
 const exec = jest.fn();

@@ -1,30 +1,42 @@
 import fs from 'fs';
+import childProcess from 'child_process';
 import dedent from 'dedent';
 import Environment from '../environment';
 
 jest.mock('fs');
+jest.mock('child_process');
 
 describe('Environment', () => {
   const environment = new Environment();
 
-  describe.skip('getDependencies', () => {
+  describe('getDependencies', () => {
+    it('returns empty object when package.json does not exist', async () => {
+      const result = await environment.getProjectDependencies();
+
+      expect(result).toEqual({});
+    });
+
+    it('returns empty object when package.json does not contain any dependencies', async () => {
+      fs._mockFileContentsOnce('package.json', dedent`{
+        "name": "Foobar"
+      }`);
+
+      const result = await environment.getProjectDependencies();
+
+      expect(result).toEqual({});
+    });
+
     it('should return all project dependencies', async () => {
-      fs.readFile.mockImplementationOnce((path, options, callback) => {
-        expect(path).toBe('package.json');
-        expect(options).toBe('utf-8');
+      fs._mockFileContentsOnce('package.json', dedent`{
+        "dependencies": {
+          "lodash": "^3.18.1"
+        },
+        "devDependencies": {
+          "babel": "^5.4.13",
+          "eslint": "^8.1.0"
+        }
+      }`);
 
-        callback(null, dedent`{
-          "dependencies": {
-            "lodash": "^3.18.1"
-          },
-          "devDependencies": {
-            "babel": "^5.4.13",
-            "eslint": "^8.1.0"
-          }
-        }`)
-      });
-
-      const environment = new Environment();
       const result = await environment.getProjectDependencies();
 
       expect(result).toEqual({
@@ -35,127 +47,95 @@ describe('Environment', () => {
     });
   });
 
-  describe.skip('getInstalledModules', () => {
+  describe('getInstalledModules', () => {
     it('should return all installed modules', async () => {
-      fs.readDir.mockImplementationOnce((path, callback) => {
-        expect(path).toBe('node_modules');
+      fs._mockDirContentsOnce('node_modules', ['lodash', 'prettier']);
 
-        callback(null, [
-          'lodash',
-          'prettier',
-        ]);
-      });
-
-      const environment = new Environment();
       const result = await environment.getInstalledModules();
 
       expect(result).toEqual(['lodash', 'prettier']);
-      expect.assertions(2);
     });
   });
 
-  describe.skip('getPackageScripts', () => {
+  describe('getPackageScripts', () => {
+    it('returns empty object when package.json does not exist', async () => {
+      const result = await environment.getProjectDependencies();
+
+      expect(result).toEqual({});
+    });
+
+    it('returns empty object when package.json does not contain any scripts', async () => {
+      fs._mockFileContentsOnce('package.json', dedent`{
+        "name": "Foobar"
+      }`);
+
+      const result = await environment.getProjectDependencies();
+
+      expect(result).toEqual({});
+    });
+
     it('should return all package scripts', async () => {
       fs._mockFileContentsOnce('package.json', dedent`{
         "scripts": {
           "test": "jest",
-          "lint": "eslint",
-        },
-      `);
-      // fs.readFile.mockImplementationOnce((path, options, callback) => {
-      //   expect(path).toBe('package.json');
+          "lint": "eslint"
+        }
+      }`);
 
-      //   callback(null, )
-      //   })
-
-      const environment = new Environment();
       const result = await environment.getPackageScripts();
 
-      expect(result).toEqual(['test', 'lint']);
-      expect.assertions(2);
+      expect(result).toEqual({
+        test: 'jest',
+        lint: 'eslint',
+      });
     });
   });
 
-  describe.skip('pathExists', () => {
+  describe('pathExists', () => {
+    it('returns false when path is unaccessible', async () => {
+      const result = await environment.pathExists('foo.js');
+
+      expect(result).toBe(false);
+    });
+
     it('returns true when path is accessible', async () => {
-      fs.access.mockImplementationOnce((path, callback) => {
-        expect(path).toBe('foo.js');
+      fs._mockFileAccessOnce('foo.js');
 
-        callback(null);
-      });
-
-      const environment = new Environment();
       const result = await environment.pathExists('foo.js');
 
       expect(result).toBe(true);
-      expect.assertions(2);
-    });
-
-    it('returns false when path is unaccessible', async () => {
-      fs.access.mockImplementationOnce((path, callback) => {
-        expect(path).toBe('foo.js');
-
-        callback(fs._enoentError());
-      });
-
-      const environment = new Environment();
-      const result = await environment.pathExists('foo.js');
-
-      expect(result).toBe(false);
-      expect.assertions(2);
-    });
-
-    it('rethrows unrecognized error', async () => {
-      fs.access.mockImplementationOnce((path, callback) => {
-        expect(path).toBe('foo.js');
-
-        callback(new Error('foo'));
-      });
-
-      const environment = new Environment();
-      const result = await environment.pathExists('foo.js');
-
-      expect(result).toBe(false);
-      expect.assertions(2);
     });
   });
 
-  describe.skip('findExecutable', () => {
-    it('returns path to find executable', async () => {
-      process.env.PATH = '/bin';
-      fs.access.mockImplementationOnce((path, mode, callback) => {
-        expect(path).toEqual('/bin/git');
-
-        callback(new Error('foo'));
-      });
-
-      const environment = new Environment();
-      const result = await environment.findExecutable('git');
-
-      expect(result).toBe('/bin/git');
-    });
-
+  describe('findExecutable', () => {
     it('returns null when executable can not be found', async () => {
       process.env.PATH = '/usr/bin:/usr/local/bin';
-      fs.access.mockImplementationOnce((path, mode, callback) => {
-        expect(path).toEqual('/usr/bin/git');
 
-        throw new Error('foo');
-      });
-      fs.access.mockImplementationOnce((path, mode, callback) => {
-        expect(path).toEqual('/usr/local/bin/git');
-
-        throw new Error('foo');
-      });
-
-      const environment = new Environment();
       const result = await environment.findExecutable('git');
 
       expect(result).toBe(null);
     });
+
+    it('returns path to the found executable', async () => {
+      process.env.PATH = '/usr/bin:/usr/local/bin';
+      fs._mockFileAccessOnce('/usr/local/bin/git', fs.constants.X_OK);
+
+      const result = await environment.findExecutable('git');
+
+      expect(result).toBe('/usr/local/bin/git');
+    });
+
+    it('returns false when none of the found files can be executed', async () => {
+      process.env.PATH = '/usr/bin';
+      fs._mockFileAccessOnce('/usr/bin/git', fs.constants.R_OK);
+
+      const result = await environment.findExecutable('git');
+
+      expect(result).toBe(null);
+    })
   });
 
-  describe.skip('isCleanWorkingTree', () => {
+  describe('isCleanWorkingTree', () => {
     it('returns true when working tree is clean', async () => {
       childProcess.exec.mockImplementationOnce((command, callback) => {
         expect(command).toBe('git diff-index --quiet HEAD --')
@@ -185,7 +165,7 @@ describe('Environment', () => {
       expect(result).toBe(false);
     });
 
-    it('rethrows unrecognized errors', async () => {
+    it('rethrows unrecognized errors', () => {
       const error = new Error('foo');
 
       childProcess.exec.mockImplementationOnce((command, callback) => {
@@ -195,9 +175,9 @@ describe('Environment', () => {
       });
 
       const environment = new Environment();
-      const result = await environment.isCleanWorkingTree();
+      const result = environment.isCleanWorkingTree();
 
-      expect(result).rejects.toEqual(error);
+      return expect(result).rejects.toBe(error);
     });
   });
 
