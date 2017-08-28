@@ -11,7 +11,7 @@ describe('withProgress', () => {
       progress: jest.fn(),
     };
 
-    module({}, {}, feedback);
+    module({ feedback });
 
     expect(feedback.progress).toHaveBeenCalledWith('foo');
   });
@@ -25,7 +25,7 @@ describe('withProgress', () => {
       () => Promise.resolve(),
     );
 
-    await module({}, {}, feedback);
+    await module({ feedback });
 
     expect(stop).toHaveBeenCalled();
   })
@@ -39,44 +39,57 @@ describe('withProgress', () => {
       () => Promise.reject(new Error('bar')),
     );
 
-    await module({}, {}, feedback).catch(noop);
+    await module({ feedback }).catch(noop);
 
     expect(stop).toHaveBeenCalled();
   });
 });
 
 describe('skipWhen', () => {
-  it('must call the inner function when predicate result resolves to false', async () => {
-    const inner = jest.fn();
+  it('must call the predicate with the context', async () => {
+    const context = Symbol('context');
+    const fn = () => {};
+    const predicate = jest.fn(() => Promise.resolve(true));
+
+    await skipWhen(predicate)(fn)(context);
+
+    expect(predicate).toHaveBeenCalledTimes(1);
+    expect(predicate).toHaveBeenCalledWith(context);
+  })
+  it('must allow the call when predicate resolves to true', async () => {
+    const context = Symbol('context');
+    const fn = jest.fn();
     const predicate = () => Promise.resolve(false);
 
-    await skipWhen(predicate)(inner)();
+    await skipWhen(predicate)(fn)(context);
 
-    expect(inner).toHaveBeenCalled();
+    expect(fn).toHaveBeenCalledTimes(1);
+    expect(fn).toHaveBeenCalledWith(context);
   });
 
-  it('must not call the inner function when predicate result resolves to true', async () => {
-    const inner = jest.fn();
+  it('must abort the call when predicate resolves to false', async () => {
+    const fn = jest.fn();
     const predicate = () => Promise.resolve(true);
 
-    await skipWhen(predicate)(inner)();
+    await skipWhen(predicate)(fn)();
 
-    expect(inner).not.toHaveBeenCalled();
+    expect(fn).toHaveBeenCalledTimes(0);
   });
 
   it('handles simple return values', async () => {
-    const inner = jest.fn();
+    const fn = jest.fn();
     const predicate = () => false;
 
-    await skipWhen(predicate)(inner)();
+    await skipWhen(predicate)(fn)();
 
-    expect(inner).toHaveBeenCalled();
+    expect(fn).toHaveBeenCalled();
   });
 
-  it('returns the value returned by inner function', async () => {
-    const innerResult = Symbol('foo');
-    const outerResult = await skipWhen(() => false)(() => innerResult)();
+  it('forwards the returned value', async () => {
+    const expectedResult = Symbol('foo');
+    const fn = () => expectedResult;
+    const result = await skipWhen(() => false)(fn)();
 
-    expect(outerResult).toBe(innerResult);
+    expect(result).toBe(expectedResult);
   });
 })

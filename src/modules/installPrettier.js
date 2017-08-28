@@ -4,12 +4,12 @@ import { promisify } from 'util';
 import { skipWhen, withProgress } from '../helpers/modules';
 import { packagerInstallCommand } from '../helpers/packagers';
 
-const shouldSkip = async (env) => {
-  const dependencies = await env.getDependencies();
+const shouldSkip = async ({ environment }) => {
+  const dependencies = await environment.getDependencies();
 
   return (
     dependencies.includes('prettier') &&
-    await env.directoryExists('node_modules/prettier')
+    await environment.directoryExists('node_modules/prettier')
   );
 }
 
@@ -18,8 +18,8 @@ const enhance = R.compose(
   withProgress('Installing prettier'),
 );
 
-const installPrettier = async (env, opts, feedback) => {
-  const packager = await env.getPackager();
+const installPrettier = async ({ environment, options, feedback }) => {
+  const packager = await environment.getPackager();
 
   if (!packager) {
     throw new Error('No packager is available.');

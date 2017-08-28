@@ -1,14 +1,15 @@
 import R from 'ramda';
 
-export const skipWhen = predicate => fn => (...args) =>
-  Promise.resolve(predicate(...args))
-    .then(result => result ? undefined : fn(...args));
+export const skipWhen = predicate => fn => (context) =>
+  Promise.resolve(predicate(context))
+    .then(result => result ? undefined : fn(context));
 
-export const withProgress = message => fn => async (env, opts, feedback) => {
+export const withProgress = message => fn => async (context) => {
+  const { feedback } = context;
   const stop = feedback.progress(message);
 
   try {
-    return await fn(env, opts, feedback);
+    return await fn(context);
   } finally {
     stop();
   }
