@@ -254,4 +254,120 @@ describe('Environment', () => {
       expect(result).toBe('.eslintrc.js');
     });
   });
+
+  describe('eslintPresets', () => {
+    it('should throw error when no supported eslint config is found', () => {
+      const result = environment.eslintPresets();
+
+      return expect(result).rejects.toEqual(expect.any(Error));
+    });
+
+    it('should return single preset from .eslintrc.json', async () => {
+      fs._mockFileAccess('.eslintrc.json');
+      fs._mockFileContents('.eslintrc.json', dedent`{
+        "extends": "foo"
+      }`);
+
+      const result = await environment.eslintPresets();
+
+      return expect(result).toEqual(['foo']);
+    });
+
+    it('should return presets from .eslintrc.json', async () => {
+      fs._mockFileAccess('.eslintrc.json');
+      fs._mockFileContents('.eslintrc.json', dedent`{
+        "extends": ["foo", "bar"]
+      }`)
+
+      const result = await environment.eslintPresets();
+
+      expect(result).toEqual(['foo', 'bar']);
+    });
+
+    it('should return presets from package.json', async () => {
+      fs._mockFileAccess('package.json');
+      fs._mockFileContents('package.json', dedent`{
+        "eslintConfig": {
+          "extends": ["foo", "bar"]
+        }
+      }`)
+
+      const result = await environment.eslintPresets();
+
+      expect(result).toEqual(['foo', 'bar']);
+    });
+  });
+
+  describe('eslintPlugins', () => {
+    it('should throw error when no supported eslint config is found', async () => {
+      const result = environment.eslintPlugins();
+
+      return expect(result).rejects.toEqual(expect.any(Error));
+    });
+
+    it('should return plugins from .eslintrc.json', async () => {
+      fs._mockFileAccess('.eslintrc.json');
+      fs._mockFileContents('.eslintrc.json', dedent`{
+        "plugins": ["foo", "bar"]
+      }`)
+
+      const result = await environment.eslintPlugins();
+
+      expect(result).toEqual(['foo', 'bar']);
+    });
+
+    it('should return presets from package.json', async () => {
+      fs._mockFileAccess('package.json');
+      fs._mockFileContents('package.json', dedent`{
+        "eslintConfig": {
+          "plugins": ["foo", "bar"]
+        }
+      }`)
+
+      const result = await environment.eslintPlugins();
+
+      expect(result).toEqual(['foo', 'bar']);
+    });
+  });
+
+  describe('eslintRules', () => {
+    it('should throw error when no supported eslint config is found', async () => {
+      const result = environment.eslintRules();
+
+      return expect(result).rejects.toEqual(expect.any(Error));
+    });
+
+    it('should return rules from .eslintrc.json', async () => {
+      fs._mockFileAccess('.eslintrc.json');
+      fs._mockFileContents('.eslintrc.json', dedent`{
+        "rules": {
+          "semi": ["warn", "always"]
+        }
+      }`)
+
+      const result = await environment.eslintRules();
+
+      expect(result).toEqual({
+        semi: ['warn', 'always'],
+      });
+    });
+
+    it('should return presets from package.json', async () => {
+      fs._mockFileAccess('package.json');
+      fs._mockFileContents('package.json', dedent`{
+        "eslintConfig": {
+          "rules": {
+            "semi": ["warn", "always"]
+          }
+        }
+      }`)
+
+      const result = await environment.eslintRules();
+
+      expect(result).toEqual({
+        semi: ['warn', 'always'],
+      });
+    });
+  });
+
 });

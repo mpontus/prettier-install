@@ -107,14 +107,37 @@ export default class Environment {
     )();
   }
 
+  async getEslintConfig() {
+    const filename = await this.findEslintrc();
+
+    switch (filename) {
+      case '.eslintrc.json':
+        return promisify(fs.readFile)(filename, 'utf8')
+          .then(contents => JSON.parse(contents));
+      case 'package.json':
+        return promisify(fs.readFile)(filename, 'utf8')
+          .then(contents => JSON.parse(contents))
+          .then(metadata => metadata.eslintConfig || {});
+      case null:
+        throw new Error('Eslint configuration file is not found')
+      default:
+        throw new Error(`Eslint configuration in file ${filename} is not supported`)
+    }
+  }
+
   eslintPresets() {
+    return this.getEslintConfig()
+      .then(config => config.extends || [])
+      .then(presets => (Array.isArray(presets) ? presets : [presets]));
   }
 
   eslintPlugins() {
-
+    return this.getEslintConfig()
+      .then(config => config.plugins || []);
   }
 
   eslintRules() {
-
+    return this.getEslintConfig()
+      .then(config => config.rules || {});
   }
 }
