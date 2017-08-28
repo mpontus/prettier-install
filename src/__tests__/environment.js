@@ -1,14 +1,12 @@
 import fs from 'fs';
 import childProcess from 'child_process';
 import dedent from 'dedent';
-import Environment from '../environment';
+import * as environment from '../environment';
 
 jest.mock('fs');
 jest.mock('child_process');
 
 describe('Environment', () => {
-  const environment = new Environment();
-
   beforeEach(() => {
     fs._mockReset();
   })
