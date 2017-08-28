@@ -147,7 +147,6 @@ describe('Environment', () => {
         callback(null);
       });
 
-      const environment = new Environment();
       const result = await environment.isCleanWorkingTree();
 
       expect(result).toBe(true);
@@ -163,7 +162,6 @@ describe('Environment', () => {
         callback(error);
       });
 
-      const environment = new Environment();
       const result = await environment.isCleanWorkingTree();
 
       expect(result).toBe(false);
@@ -178,7 +176,6 @@ describe('Environment', () => {
         callback(error);
       });
 
-      const environment = new Environment();
       const result = environment.isCleanWorkingTree();
 
       return expect(result).rejects.toBe(error);
