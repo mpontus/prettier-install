@@ -9,6 +9,10 @@ jest.mock('child_process');
 describe('Environment', () => {
   const environment = new Environment();
 
+  beforeEach(() => {
+    fs._mockReset();
+  })
+
   describe('getDependencies', () => {
     it('returns empty object when package.json does not exist', async () => {
       const result = await environment.getProjectDependencies();
@@ -17,7 +21,7 @@ describe('Environment', () => {
     });
 
     it('returns empty object when package.json does not contain any dependencies', async () => {
-      fs._mockFileContentsOnce('package.json', dedent`{
+      fs._mockFileContents('package.json', dedent`{
         "name": "Foobar"
       }`);
 
@@ -27,7 +31,7 @@ describe('Environment', () => {
     });
 
     it('should return all project dependencies', async () => {
-      fs._mockFileContentsOnce('package.json', dedent`{
+      fs._mockFileContents('package.json', dedent`{
         "dependencies": {
           "lodash": "^3.18.1"
         },
@@ -49,7 +53,7 @@ describe('Environment', () => {
 
   describe('getInstalledModules', () => {
     it('should return all installed modules', async () => {
-      fs._mockDirContentsOnce('node_modules', ['lodash', 'prettier']);
+      fs._mockDirContents('node_modules', ['lodash', 'prettier']);
 
       const result = await environment.getInstalledModules();
 
@@ -65,7 +69,7 @@ describe('Environment', () => {
     });
 
     it('returns empty object when package.json does not contain any scripts', async () => {
-      fs._mockFileContentsOnce('package.json', dedent`{
+      fs._mockFileContents('package.json', dedent`{
         "name": "Foobar"
       }`);
 
@@ -75,7 +79,7 @@ describe('Environment', () => {
     });
 
     it('should return all package scripts', async () => {
-      fs._mockFileContentsOnce('package.json', dedent`{
+      fs._mockFileContents('package.json', dedent`{
         "scripts": {
           "test": "jest",
           "lint": "eslint"
@@ -99,7 +103,7 @@ describe('Environment', () => {
     });
 
     it('returns true when path is accessible', async () => {
-      fs._mockFileAccessOnce('foo.js');
+      fs._mockFileAccess('foo.js');
 
       const result = await environment.pathExists('foo.js');
 
@@ -118,7 +122,7 @@ describe('Environment', () => {
 
     it('returns path to the found executable', async () => {
       process.env.PATH = '/usr/bin:/usr/local/bin';
-      fs._mockFileAccessOnce('/usr/local/bin/git', fs.constants.X_OK);
+      fs._mockFileAccess('/usr/local/bin/git', fs.constants.X_OK);
 
       const result = await environment.findExecutable('git');
 
@@ -127,7 +131,7 @@ describe('Environment', () => {
 
     it('returns false when none of the found files can be executed', async () => {
       process.env.PATH = '/usr/bin';
-      fs._mockFileAccessOnce('/usr/bin/git', fs.constants.R_OK);
+      fs._mockFileAccess('/usr/bin/git', fs.constants.R_OK);
 
       const result = await environment.findExecutable('git');
 
@@ -137,7 +141,7 @@ describe('Environment', () => {
 
   describe('isCleanWorkingTree', () => {
     it('returns true when working tree is clean', async () => {
-      childProcess.exec.mockImplementationOnce((command, callback) => {
+      childProcess.exec.mockImplementation((command, callback) => {
         expect(command).toBe('git diff-index --quiet HEAD --')
 
         callback(null);
@@ -150,7 +154,7 @@ describe('Environment', () => {
     });
 
     it('returns false when working tree is dirty', async () => {
-      childProcess.exec.mockImplementationOnce((command, callback) => {
+      childProcess.exec.mockImplementation((command, callback) => {
         expect(command).toBe('git diff-index --quiet HEAD --')
 
         const error = new Error('Process exitted with status code 1');
@@ -168,7 +172,7 @@ describe('Environment', () => {
     it('rethrows unrecognized errors', () => {
       const error = new Error('foo');
 
-      childProcess.exec.mockImplementationOnce((command, callback) => {
+      childProcess.exec.mockImplementation((command, callback) => {
         expect(command).toBe('git diff-index --quiet HEAD --')
 
         callback(error);
@@ -189,8 +193,8 @@ describe('Environment', () => {
     });
 
     it('returns null if package.json does not contain eslintConfig section', async () => {
-      fs._mockFileAccessOnce('package.json');
-      fs._mockFileContentsOnce('package.json', dedent`{
+      fs._mockFileAccess('package.json');
+      fs._mockFileContents('package.json', dedent`{
         "name": "Foo"
       }`);
 
@@ -200,8 +204,8 @@ describe('Environment', () => {
     });
 
     it('returns package.json when it contains eslintConfig section', async () => {
-      fs._mockFileAccessOnce('package.json');
-      fs._mockFileContentsOnce('package.json', dedent`{
+      fs._mockFileAccess('package.json');
+      fs._mockFileContents('package.json', dedent`{
         "eslintConfig": {}
       }`);
 
@@ -211,7 +215,7 @@ describe('Environment', () => {
     });
 
     it('returns .eslintrc when no higher priority file exists', async () => {
-      fs._mockFileAccessOnce('.eslintrc');
+      fs._mockFileAccess('.eslintrc');
 
       const result = await environment.findEslintrc();
 
@@ -219,7 +223,7 @@ describe('Environment', () => {
     });
 
     it('returns .eslintrc.json when no higher priority file exists', async () => {
-      fs._mockFileAccessOnce('.eslintrc.json');
+      fs._mockFileAccess('.eslintrc.json');
 
       const result = await environment.findEslintrc();
 
@@ -227,7 +231,7 @@ describe('Environment', () => {
     });
 
     it('returns .eslintrc.yml when no higher priority file exists', async () => {
-      fs._mockFileAccessOnce('.eslintrc.yml');
+      fs._mockFileAccess('.eslintrc.yml');
 
       const result = await environment.findEslintrc();
 
@@ -235,7 +239,7 @@ describe('Environment', () => {
     });
 
     it('returns .eslintrc.yaml when no higher priority file exists', async () => {
-      fs._mockFileAccessOnce('.eslintrc.yaml');
+      fs._mockFileAccess('.eslintrc.yaml');
 
       const result = await environment.findEslintrc();
 
@@ -243,7 +247,7 @@ describe('Environment', () => {
     });
 
     it('returns .eslintrc.js when it exists', async () => {
-      fs._mockFileAccessOnce('.eslintrc.js');
+      fs._mockFileAccess('.eslintrc.js');
 
       const result = await environment.findEslintrc();
 

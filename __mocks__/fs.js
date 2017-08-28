@@ -25,23 +25,29 @@ const allModes =
 const _fileStats = { isFile: () => true };
 const _dirStats = { isDirectory: () => true }
 
-const _filesAccess = {};
-const _filesStats = {};
-const _filesContents = {};
-const _dirsContents = {};
+let _filesAccess = {};
+let _filesStats = {};
+let _filesContents = {};
+let _dirsContents = {};
 
-const _mockFileAccessOnce = (path, mode = allModes) => {
+const _mockFileAccess = (path, mode = allModes) => {
   _filesAccess[path] = mode;
 };
-const _mockFileStatsOnce = (path, stats = _fileStats) => {
+const _mockFileStats = (path, stats = _fileStats) => {
   _filesStats[path] = stats;
 };
-const _mockFileContentsOnce = (path, contents) => {
+const _mockFileContents = (path, contents) => {
   _filesContents[path] = contents;
 };
-const _mockDirContentsOnce = (path, contents) => {
+const _mockDirContents = (path, contents) => {
   _dirsContents[path] = contents;
 };
+const _mockReset = () => {
+  _filesAccess = {};
+  _filesStats = {};
+  _filesContents = {};
+  _dirsContents = {};
+}
 
 const access = jest.fn((path, mode, callback) => {
   if (!callback) {
@@ -49,8 +55,6 @@ const access = jest.fn((path, mode, callback) => {
   };
 
   const fileAccess = _filesAccess[path];
-
-  delete _filesAccess[path];
 
   if (fileAccess === undefined) {
     callback(_enoentError());
@@ -70,8 +74,6 @@ const access = jest.fn((path, mode, callback) => {
 const stat = jest.fn((path, callback) => {
   const fileStats = _filesStats[path];
 
-  delete _filesStats[path];
-
   if (fileStats === undefined) {
     callback(_enoentError());
 
@@ -88,9 +90,8 @@ const readFile = jest.fn((path, options, callback) => {
 
   const fileContents = _filesContents[path];
 
-  delete _filesContents[path];
-
   if (fileContents === undefined) {
+
     callback(_enoentError());
   }
 
@@ -103,8 +104,6 @@ const readDir = jest.fn((path, options, callback) => {
   }
 
   const dirContents = _dirsContents[path];
-
-  delete _dirsContents[path];
 
   if (dirContents === undefined) {
     callback(_enoentError());
@@ -123,10 +122,11 @@ Object.assign(module.exports, {
   readDir,
   _enoentError,
   _eaccesError,
-  _mockFileAccessOnce,
-  _mockFileStatsOnce,
-  _mockFileContentsOnce,
-  _mockDirContentsOnce,
+  _mockFileAccess,
+  _mockFileStats,
+  _mockFileContents,
+  _mockDirContents,
+  _mockReset,
   _fileStats,
   _dirStats,
 });
