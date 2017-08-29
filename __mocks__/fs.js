@@ -112,6 +112,13 @@ const readDir = jest.fn((path, options, callback) => {
   callback(null, dirContents);
 });
 
+const writeFile = jest.fn((file, data, options, callback) => {
+  if (!callback) {
+    [callback, options] = [options, undefined];
+  };
+
+  callback(null);
+})
 
 module.exports = fs;
 
@@ -120,6 +127,7 @@ Object.assign(module.exports, {
   stat,
   readFile,
   readDir,
+  writeFile,
   _enoentError,
   _eaccesError,
   _mockFileAccess,
