@@ -23,6 +23,39 @@ describe('enhance', () => {
 
     expect(fn).toHaveBeenCalledTimes(0);
   });
+
+  it('should skip when prettier command already exists and custom glob is provided', async () => {
+    const contextWithoutGlob = {
+      environment: {
+        getPackageScripts: () => ({
+          'prettier': 'prettier --write **/*.js',
+        }),
+      },
+      options: {
+        'glob': null,
+      },
+      feedback: {
+        progress: () => () => undefined,
+      },
+    };
+
+    const contextWithGlob = {
+      ...contextWithoutGlob,
+      options: {
+        'glob': '**/*.js **/*.jsx **/*.scss',
+      },
+    };
+
+    const fn = jest.fn();
+
+    await enhance(fn)(contextWithoutGlob);
+
+    expect(fn).toHaveBeenCalledTimes(0);
+
+    await enhance(fn)(contextWithGlob);
+
+    expect(fn).toHaveBeenCalledTimes(1);
+  })
 });
 
 describe('addPrettierScript', () => {

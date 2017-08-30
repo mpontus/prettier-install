@@ -8,8 +8,16 @@ const DEFAULT_GLOB = '**/*.js';
 
 const hasOption = option => ({ options }) => R.has(option, options);
 
+const shouldSkip = R.anyPass([
+  ({ options }) => options['no-command'],
+  R.both(
+    ({ environment }) => 'prettier' in environment.getPackageScripts(),
+    ({ options }) => !options['glob'],
+  ),
+]);
+
 export const enhance = R.compose(
-  skipWhen(hasOption('no-command')),
+  skipWhen(shouldSkip),
   withProgress('Adding prettier script'),
 );
 
