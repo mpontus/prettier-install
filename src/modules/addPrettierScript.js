@@ -8,28 +8,8 @@ const DEFAULT_GLOB = '**/*.js';
 
 const hasOption = option => ({ options }) => R.has(option, options);
 
-const eslintInstalled = ({ environment }) => 'eslint' in environment.getProjectDependencies();
-
-const shouldForce = hasOption('command');
-
-const shouldSkip = R.anyPass([
-  ({ environment }) => 'prettier' in environment.getPackageScripts(),
-  hasOption('no-command'),
-  R.allPass([
-    eslintInstalled,
-    R.complement(hasOption('no-eslint-plugin')),
-  ]),
-  hasOption('eslint-plugin'),
-]);
-
 export const enhance = R.compose(
-  skipWhen(
-    R.ifElse(
-      shouldForce,
-      R.F,
-      shouldSkip,
-    ),
-  ),
+  skipWhen(hasOption('no-command')),
   withProgress('Adding prettier script'),
 );
 
