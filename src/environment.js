@@ -47,7 +47,7 @@ export function pathExists(path) {
 
 export function findExecutable(name) {
   const isExecutable = path =>
-  promisify(fs.access)(path, fs.constants.X_OK);
+    promisify(fs.access)(path, fs.constants.X_OK);
 
   return process.env.PATH.split(':').map(
     dir => path.resolve(dir, name),
@@ -56,6 +56,18 @@ export function findExecutable(name) {
       .then(() => path, () => next()),
     () => Promise.resolve(null),
   )();
+}
+
+export async function getPackager() {
+  if (await findExecutable('yarn')) {
+    return 'yarn';
+  }
+
+  if (await findExecutable('npm')) {
+    return 'npm';
+  }
+
+  return null;
 }
 
 export function isCleanWorkingTree() {

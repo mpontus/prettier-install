@@ -11,6 +11,34 @@ describe('Environment', () => {
     fs._mockReset();
   })
 
+  describe('getPacakger', () => {
+    it('returns null when no packager binary can be found', async () => {
+      process.env.PATH = '/usr/bin';
+
+      const result = await environment.getPackager();
+
+      expect(result).toBe(null);
+    });
+
+    it('returns yarn when yarn binary exists', async () => {
+      process.env.PATH = '/usr/bin';
+      fs._mockFileAccess('/usr/bin/yarn', fs.constants.X_OK);
+
+      const result = await environment.getPackager();
+
+      expect(result).toBe('yarn');
+    });
+
+    it('returns npm when npm binary exists', async () => {
+      process.env.PATH = '/usr/bin';
+      fs._mockFileAccess('/usr/bin/npm', fs.constants.X_OK);
+
+      const result = await environment.getPackager();
+
+      expect(result).toBe('npm');
+    });
+  });
+
   describe('getDependencies', () => {
     it('returns empty object when package.json does not exist', async () => {
       const result = await environment.getProjectDependencies();
