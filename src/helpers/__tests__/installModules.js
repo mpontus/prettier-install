@@ -1,13 +1,13 @@
 import fs from 'fs';
 import childProcess from 'child_process';
-import installModule from '../installModule';
+import installModules from '../installModules';
 
 jest.mock('fs');
 jest.mock('child_process');
 
 describe('installModule', () => {
   it('throws error when no packager is available', () => {
-    const result = installModule('foo');
+    const result = installModules(['foo']);
 
     expect(result).rejects.toEqual(expect.any(Error));
   });
@@ -17,7 +17,7 @@ describe('installModule', () => {
     fs._mockFileAccess('/usr/bin/npm', fs.constants.X_OK);
     childProcess.exec.mockImplementationOnce((command, callback) => callback());
 
-    await installModule('foo', 'bar');
+    await installModules(['foo', 'bar']);
 
     expect(childProcess.exec).toHaveBeenCalledWith(
       'npm install --save-dev foo bar',
@@ -30,7 +30,7 @@ describe('installModule', () => {
     fs._mockFileAccess('/usr/bin/yarn', fs.constants.X_OK);
     childProcess.exec.mockImplementationOnce((command, callback) => callback());
 
-    await installModule('foo', 'bar');
+    await installModules(['foo', 'bar']);
 
     expect(childProcess.exec).toHaveBeenCalledWith(
       'yarn add --dev foo bar',

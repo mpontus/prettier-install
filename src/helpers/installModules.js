@@ -24,7 +24,7 @@ const detectPackager = async () => {
   return null;
 }
 
-const installModuleCommand = async (...modules) => {
+const installModulesCommand = async (modules) => {
   const packager = await detectPackager();
 
   if (!packager) {
@@ -43,9 +43,9 @@ const installModuleCommand = async (...modules) => {
   }
 }
 
-const installModule = R.composeP(
+const installModules = R.composeP(
   promisify(childProcess.exec),
-  installModuleCommand,
+  installModulesCommand,
 );
 
-export default installModule;
+export default installModules;
