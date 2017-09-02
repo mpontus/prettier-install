@@ -1,7 +1,7 @@
 import R from 'ramda';
 import findEslintConfig from './findEslintConfig';
-import modifyFile from './modifyFile';
-import processJson from './processJson';
+import modifyFile, { writeFile } from './modifyFile';
+import processJson, { stringifyJson } from './processJson';
 
 const applyModifierToFile = R.curry(
   (filename, modifier) => {
@@ -20,7 +20,9 @@ const modifyEslintConfig = async (modifier) => {
   const filename = await findEslintConfig();
 
   if (!filename) {
-    throw new Error('Eslint configuration file is not found');
+    const newConfig = modifier({});
+
+    return writeFile('.eslintrc.json', stringifyJson(2, newConfig));
   }
 
   const fileModifier = applyModifierToFile(filename, modifier);

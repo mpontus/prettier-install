@@ -9,14 +9,24 @@ describe('modifyFile', () => {
     fs._mockReset();
   });
 
-  it('must throw an error when no eslint config file exsits', () => {
-    const modifier = () => {};
-    const result = modifyEslintConfig(modifier);
+  it('creates new .eslintrc.json when no eslint config file exists', async () => {
+    const modifier = jest.fn(() => ({
+      foo: "bar",
+    }));
 
-    return expect(result).rejects.toEqual(expect.any(Error));
+    await modifyEslintConfig(modifier);
+
+    expect(modifier).toHaveBeenCalledWith({});
+    expect(fs.writeFile).toHaveBeenCalledWith(
+      '.eslintrc.json',
+      dedent`{
+        "foo": "bar"
+      }`,
+      expect.any(Function),
+    );
   });
 
-  it('must throw an error when no supported eslint config file exsits', async () => {
+  it('must throw an error when eslint config file is unsupported', async () => {
     fs._mockFileAccess('.eslintrc.js');
 
     const modifier = () => {};
