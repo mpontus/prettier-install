@@ -14,3 +14,9 @@ export const withProgress = message => fn => async (context) => {
     stop();
   }
 }
+
+export const isModuleInstalled = module => ({ environment }) =>
+  environment.getInstalledModules()
+    .then(modules => modules.includes(module));
+
+export const hasOption = option => ({ options }) => options[option];
