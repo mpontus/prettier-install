@@ -1,29 +1,26 @@
-const fs = jest.genMockFromModule('fs');
+const fs = jest.genMockFromModule("fs");
 
 const _enoentError = () => {
-  const error = new Error('No such file or directory');
+  const error = new Error("No such file or directory");
 
-  error.code = 'ENOENT';
+  error.code = "ENOENT";
 
   return error;
-}
+};
 
 const _eaccesError = () => {
-  const error = new Error('Permission denied');
+  const error = new Error("Permission denied");
 
-  error.code = 'EACCES';
+  error.code = "EACCES";
 
   return error;
-}
+};
 
 const allModes =
-  fs.constants.F_OK &
-  fs.constants.R_OK &
-  fs.constants.W_OK &
-  fs.constants.X_OK;
+  fs.constants.F_OK & fs.constants.R_OK & fs.constants.W_OK & fs.constants.X_OK;
 
 const _fileStats = { isFile: () => true };
-const _dirStats = { isDirectory: () => true }
+const _dirStats = { isDirectory: () => true };
 
 let _filesAccess = {};
 let _filesStats = {};
@@ -47,12 +44,12 @@ const _mockReset = () => {
   _filesStats = {};
   _filesContents = {};
   _dirsContents = {};
-}
+};
 
 const access = jest.fn((path, mode, callback) => {
   if (!callback) {
     [callback, mode] = [mode, fs.constants.F_OK];
-  };
+  }
 
   const fileAccess = _filesAccess[path];
 
@@ -91,11 +88,10 @@ const readFile = jest.fn((path, options, callback) => {
   const fileContents = _filesContents[path];
 
   if (fileContents === undefined) {
-
     callback(_enoentError());
   }
 
-  callback(null, options === 'utf8' ? fileContents : Buffer.from(fileContents));
+  callback(null, options === "utf8" ? fileContents : Buffer.from(fileContents));
 });
 
 const readDir = jest.fn((path, options, callback) => {
@@ -115,10 +111,10 @@ const readDir = jest.fn((path, options, callback) => {
 const writeFile = jest.fn((file, data, options, callback) => {
   if (!callback) {
     [callback, options] = [options, undefined];
-  };
+  }
 
   callback(null);
-})
+});
 
 module.exports = fs;
 
@@ -136,5 +132,5 @@ Object.assign(module.exports, {
   _mockDirContents,
   _mockReset,
   _fileStats,
-  _dirStats,
+  _dirStats
 });
